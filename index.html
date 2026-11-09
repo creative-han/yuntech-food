@@ -474,7 +474,7 @@
                         <h1 class="font-hand text-3xl sm:text-4xl font-black tracking-wide text-[#5C4938] flex flex-wrap items-center justify-center sm:justify-start gap-2">
                             呷蝦米
                             <span class="text-sm sm:text-base font-bold bg-[#F7A072] text-white px-3 py-1 rounded-full border-2 border-[#5C4938] shadow-[0_2px_0_#5C4938]">
-                                雲科美食手帳
+                                不用煩惱在斗六吃什麼
                             </span>
                         </h1>
                         <p class="text-xs sm:text-sm font-bold text-[#857262] mt-1">
@@ -1180,18 +1180,6 @@
         // Google 試算表發佈連結
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRgR-xVrt0xrqEnRSjwGU9_En5SlueYShf4GNZ5nJJPAFmNdwblLCeb9GmhcaRWmmvK3Gd3biuAcaA2/pub?output=csv";
 
-        // 備援雲科周邊真實美食資料
-        const FALLBACK_STORES = [
-            { name: "施家屯牛雜", type: "中式", "price_level (均消預算)": "100", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.4", open_time_1: "11:00", close_time_1: "20:30", closed_days_1: "Saturday", "lat(緯度)": "23.6928", "lng(經度)": "120.5342", map_link: "https://www.google.com/maps/search/?api=1&query=雲林科技大學+施家屯牛雜" },
-            { name: "大吉祥香豆腐", type: "中式", "price_level (均消預算)": "100", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.3", open_time_1: "11:00", close_time_1: "20:00", closed_days_1: "Sunday", "lat(緯度)": "23.6941", "lng(經度)": "120.5355", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+大吉祥香豆腐" },
-            { name: "雲科阿婆水餃", type: "中式", "price_level (均消預算)": "100", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.5", open_time_1: "11:00", close_time_1: "19:30", closed_days_1: "Saturday", "lat(緯度)": "23.6935", "lng(經度)": "120.5361", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+阿婆水餃" },
-            { name: "Mr.拉麵 (斗六店)", type: "日式", "price_level (均消預算)": "200", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.2", open_time_1: "11:00", close_time_1: "14:00", open_time_2: "17:00", close_time_2: "20:30", "lat(緯度)": "23.7021", "lng(經度)": "120.5398", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+Mr.拉麵" },
-            { name: "凹凸咖啡館", type: "西式", "price_level (均消預算)": "300", meal_time_1: "午餐", meal_time_2: "飲料", rating: "4.6", open_time_1: "10:00", close_time_1: "18:00", closed_days_1: "Tuesday", "lat(緯度)": "23.7072", "lng(經度)": "120.5412", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+凹凸咖啡館" },
-            { name: "老鄰居1971", type: "中式", "price_level (均消預算)": "300", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.5", open_time_1: "11:10", close_time_1: "14:00", open_time_2: "17:10", close_time_2: "20:00", closed_days_1: "Wednesday", "lat(緯度)": "23.7089", "lng(經度)": "120.5430", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+老鄰居1971" },
-            { name: "晨間廚房 雲科店", type: "西式", "price_level (均消預算)": "100", meal_time_1: "早餐", meal_time_2: "午餐", rating: "4.3", open_time_1: "06:00", close_time_1: "13:00", "lat(緯度)": "23.6948", "lng(經度)": "120.5370", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+晨間廚房" },
-            { name: "迷客夏 斗六民生店", type: "飲料", "price_level (均消預算)": "100", meal_time_1: "飲料", meal_time_2: "宵夜", rating: "4.4", open_time_1: "09:30", close_time_1: "22:00", "lat(緯度)": "23.7105", "lng(經度)": "120.5415", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+迷客夏" },
-            { name: "泰國小館 雲科店", type: "其他異國料理", "price_level (均消預算)": "200", meal_time_1: "午餐", meal_time_2: "晚餐", rating: "4.3", open_time_1: "11:00", close_time_1: "20:30", "lat(緯度)": "23.6952", "lng(經度)": "120.5364", map_link: "https://www.google.com/maps/search/?api=1&query=斗六+泰國小館" }
-        ];
 
         // 轉盤 6 個盲盒主題名稱
         const BLIND_BOX_THEMES = [

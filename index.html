@@ -432,6 +432,47 @@
             filter: brightness(0.72) contrast(1.08) saturate(0.88) hue-rotate(185deg);
             transition: filter 0.5s ease;
         }
+
+        /* =========================================================
+           6. Mobile UX & Touch-Friendly Map Controls (< 640px)
+           ========================================================= */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 地圖全螢幕放大檢視模式 (手機操作超順手) */
+        .map-expanded-overlay {
+            position: fixed !important;
+            inset: 10px 10px 76px 10px !important;
+            z-index: 45 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            box-shadow: 0 12px 40px rgba(92, 73, 56, 0.35) !important;
+        }
+        .map-expanded-overlay .leaflet-container {
+            flex: 1 1 auto !important;
+            height: 100% !important;
+            min-height: 0 !important;
+        }
+
+        @media (max-width: 639px) {
+            .sumikko-card { border-radius: 20px; }
+            .sumikko-map-wrapper { padding: 7px 7px 10px 7px; border-radius: 18px; }
+            /* 放大手機版 Leaflet 縮放按鈕，手指更好按 */
+            .leaflet-touch .leaflet-bar a,
+            .leaflet-bar a {
+                width: 36px !important;
+                height: 36px !important;
+                line-height: 36px !important;
+                font-size: 20px !important;
+                font-weight: 900 !important;
+                color: #5C4938 !important;
+            }
+            .leaflet-popup-content {
+                margin: 8px 10px !important;
+            }
+        }
     </style>
 </head>
 <body class="relative pt-5 pb-28 sm:py-6 px-3.5 sm:px-6 lg:px-8 flex flex-col items-center">
@@ -466,15 +507,15 @@
     <div class="w-full max-w-5xl z-10">
 
         <!-- 頂部招牌 Header -->
-        <header class="sumikko-card corner-wall-bg p-5 sm:p-6 mb-6 overflow-hidden">
+        <header class="sumikko-card corner-wall-bg p-3.5 sm:p-6 mb-4 sm:mb-6 overflow-hidden">
             <div class="absolute top-0 left-28 bottom-0 border-l-2 border-dashed border-[#DFD5C6] pointer-events-none hidden sm:block"></div>
 
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
-                <!-- 左側：吉祥物「阿蝦」與「米米」 -->
-                <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 relative z-10">
+                <!-- 左側：吉祥物「阿蝦」與「米米」 (手機版改為精簡橫排不佔版面) -->
+                <div class="flex flex-row items-center gap-3 sm:gap-4 text-left w-full sm:w-auto">
                     <div id="header-mascot-stage" data-action="cycle-mood" title="點我換阿蝦與米米的表情！"
-                         class="relative w-40 h-28 flex-shrink-0 cursor-pointer group select-none">
-                        <div id="mascot-speech" class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap bg-white border-2 border-[#5C4938] rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[#5C4938] shadow-sm transition-all">
+                         class="relative w-28 h-20 sm:w-40 sm:h-28 flex-shrink-0 cursor-pointer group select-none">
+                        <div id="mascot-speech" class="hidden sm:block absolute -top-2 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap bg-white border-2 border-[#5C4938] rounded-full px-2.5 py-0.5 text-[11px] font-bold text-[#5C4938] shadow-sm transition-all">
                             今天想吃什麼好料呢... (點我)
                         </div>
                         <svg id="header-mascot-svg" viewBox="0 0 185 120" class="w-full h-full overflow-visible squishy-idle">
@@ -518,17 +559,17 @@
                         </svg>
                     </div>
 
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-bold mb-1">
+                    <div class="min-w-0 flex-1">
+                        <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-bold mb-1">
                             <span>SHIAMI YUNTECH FOODIE</span>
                         </div>
-                        <h1 class="font-hand text-2xl sm:text-4xl font-black tracking-wide text-[#5C4938] flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h1 class="font-hand text-2xl sm:text-4xl font-black tracking-wide text-[#5C4938] flex flex-wrap items-center justify-start gap-1.5 sm:gap-2">
                             <span class="whitespace-nowrap">呷蝦米</span>
-                            <span class="text-xs sm:text-base font-bold bg-[#F7A072] text-white px-3 py-1 rounded-full border-2 border-[#5C4938] shadow-[0_2px_0_#5C4938] whitespace-nowrap">
+                            <span class="text-[11px] sm:text-base font-bold bg-[#F7A072] text-white px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border-2 border-[#5C4938] shadow-[0_2px_0_#5C4938] whitespace-nowrap">
                                 雲科美食手帳
                             </span>
                         </h1>
-                        <p class="text-xs sm:text-sm font-bold text-[#857262] mt-1">
+                        <p class="hidden sm:block text-xs sm:text-sm font-bold text-[#857262] mt-1">
                             阿蝦與米米陪你探索雲科周邊的每一口幸福美味
                         </p>
                     </div>
@@ -647,23 +688,30 @@
         <!-- ==================== 分頁 1：轉盤抽美食 ==================== -->
         <div id="tab-panel-wheel" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- 左欄：條件篩選面板 -->
-            <section class="lg:col-span-5 sumikko-card p-5 sm:p-6 bg-white">
-                <div class="flex items-center justify-between border-b-2 border-dashed border-[#EAE2D6] pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none">
+            <!-- 左欄：條件篩選面板 (手機版可一鍵收合，減少滑動雜亂感；電腦版維持展開) -->
+            <section class="lg:col-span-5 sumikko-card p-4 sm:p-6 bg-white">
+                <div class="flex items-center justify-between gap-2 pb-2.5 sm:pb-3 sm:mb-4 sm:border-b-2 sm:border-dashed sm:border-[#EAE2D6]">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 28 28" fill="none">
                             <path d="M6 9H22V18C22 22 18.5 24 14 24C9.5 24 6 22 6 18V9Z" fill="#A8D8B9" stroke="#5C4938" stroke-width="2" stroke-linejoin="round"/>
                             <path d="M9 9V7C9 5.5 19 5.5 19 7V9" stroke="#5C4938" stroke-width="1.8"/>
                             <circle cx="11.5" cy="16" r="1.3" fill="#5C4938"/><circle cx="16.5" cy="16" r="1.3" fill="#5C4938"/>
                             <path d="M13.2 16.8H14.8" stroke="#5C4938" stroke-width="1.4" stroke-linecap="round"/>
                         </svg>
-                        <h2 class="text-base sm:text-lg font-black">挑選今日覓食條件</h2>
+                        <h2 class="text-sm sm:text-lg font-black truncate">挑選覓食條件</h2>
                     </div>
-                    <div id="match-count-badge" class="px-3 py-1 rounded-full bg-[#FAF6F0] border-2 border-[#5C4938] text-xs font-extrabold text-[#5C4938]">
-                        符合：計算中...
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                        <div id="match-count-badge" class="px-2.5 sm:px-3 py-1 rounded-full bg-[#FAF6F0] border-2 border-[#5C4938] text-[11px] sm:text-xs font-extrabold text-[#5C4938] whitespace-nowrap">
+                            符合：計算中...
+                        </div>
+                        <button type="button" id="btn-toggle-mobile-filters" data-action="toggle-mobile-filters"
+                            class="sm:hidden px-2.5 py-1 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-[11px] font-black text-[#5C4938] whitespace-nowrap">
+                            收合條件
+                        </button>
                     </div>
                 </div>
 
+                <div id="filter-panel-body" class="pt-3 sm:pt-0 border-t-2 border-dashed border-[#EAE2D6] sm:border-t-0">
                 <!-- 1A. 僅推薦現在有營業 -->
                 <label for="onlyOpenNow" class="sumikko-card-sm bg-[#FAF6F0] p-3 mb-3 flex items-center justify-between cursor-pointer hover:bg-[#F4EDE2] transition">
                     <div class="flex items-center gap-3">
@@ -814,6 +862,7 @@
                 <div id="hidden-stores-bar" class="hidden mt-4 pt-3 border-t-2 border-dashed border-[#EAE2D6] flex items-center justify-between text-xs font-bold text-[#857262]">
                     <span id="hidden-stores-text">今日有 0 間店先蓋海苔被休息中</span>
                     <button type="button" data-action="switch-tab" data-tab="pocket" class="underline text-[#E87A64] font-black">管理名單</button>
+                </div>
                 </div>
             </section>
 
@@ -1280,46 +1329,50 @@
         </div>
 
         <!-- ==================== 分頁 5：蝦米小鎮美食地圖 ==================== -->
-        <div id="tab-panel-map" class="hidden space-y-5">
-            <section class="sumikko-card p-5 sm:p-6 bg-white">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div id="tab-panel-map" class="hidden space-y-4 sm:space-y-5">
+            <section class="sumikko-card p-3.5 sm:p-6 bg-white">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-3 sm:mb-4">
                     <div>
-                        <h2 class="text-lg sm:text-xl font-black text-[#5C4938] flex items-center gap-2 flex-wrap">
+                        <h2 class="text-base sm:text-xl font-black text-[#5C4938] flex items-center gap-2 flex-wrap">
                             <span>蝦米小鎮美食大冒險地圖</span>
-                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938]">自由裝潢你的小鎮</span>
+                            <span class="hidden sm:inline-block text-xs px-2.5 py-0.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938]">自由裝潢你的小鎮</span>
                         </h2>
-                        <p class="text-xs font-bold text-[#857262] mt-0.5">只顯示你收藏的私房愛店！小夥伴與車車會自由在鎮上漫步，也能隨時拖曳佈置你的專屬蝦米小鎮～</p>
+                        <p class="hidden sm:block text-xs font-bold text-[#857262] mt-0.5">只顯示你收藏的私房愛店！小夥伴與車車會自由在鎮上漫步，也能隨時拖曳佈置你的專屬蝦米小鎮～</p>
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" id="btn-town-time" data-action="cycle-atmosphere" class="capsule-btn bg-[#FCE8A6] text-xs">
+                    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap">
+                        <button type="button" id="btn-town-time" data-action="cycle-atmosphere" class="capsule-btn bg-[#FCE8A6] text-xs flex-shrink-0">
                             <span id="btn-town-time-text" class="inline-flex items-center gap-1.5">暖陽白天</span>
                         </button>
-                        <button type="button" id="btn-toggle-cruise" data-action="toggle-cruise" class="capsule-btn bg-[#F9C5BD] text-xs">
+                        <button type="button" id="btn-toggle-cruise" data-action="toggle-cruise" class="capsule-btn bg-[#F9C5BD] text-xs flex-shrink-0">
                             <span id="btn-toggle-cruise-text">小鎮自由漫步中 (點我暫停)</span>
                         </button>
-                        <button type="button" data-action="center-map" class="capsule-btn bg-white text-xs"><span>回小鎮中心</span></button>
-                        <button type="button" data-action="locate-full-map" class="capsule-btn bg-[#A8D8B9] text-xs"><span>定位我</span></button>
+                        <button type="button" data-action="center-map" class="capsule-btn bg-white text-xs flex-shrink-0"><span>回小鎮中心</span></button>
+                        <button type="button" data-action="locate-full-map" class="capsule-btn bg-[#A8D8B9] text-xs flex-shrink-0"><span>定位我</span></button>
                     </div>
                 </div>
 
-                <div class="sumikko-card-sm bg-[#FAF6F0] p-3 mb-3 flex flex-col gap-2">
+                <div class="sumikko-card-sm bg-[#FAF6F0] p-2.5 sm:p-3 mb-3 flex flex-col gap-2">
                     <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-black text-[#5C4938]">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-[#A8D8B9] border border-[#5C4938] inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M14.5 5.5L18.5 9.5L9 19H5V15L14.5 5.5Z" fill="#FFFDF9" stroke="#5C4938" stroke-width="2" stroke-linejoin="round"/></svg><span>小鎮裝潢模式</span></span>
-                            <span id="town-life-summary">可直接拖曳地圖上的小夥伴、車車與設施擺放位置！</span>
-                        </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" data-action="randomize-town" class="px-2.5 py-1 rounded-full bg-white border border-[#5C4938] text-[11px] font-black hover:bg-[#FCE8A6] transition inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4" fill="#FCE8A6" stroke="#5C4938" stroke-width="2"/><circle cx="9" cy="9" r="1.4" fill="#5C4938"/><circle cx="15" cy="15" r="1.4" fill="#5C4938"/><circle cx="15" cy="9" r="1.4" fill="#5C4938"/><circle cx="9" cy="15" r="1.4" fill="#5C4938"/></svg><span>隨機趣味擺放</span></button>
-                            <button type="button" data-action="reset-town" class="px-2.5 py-1 rounded-full bg-white border border-[#5C4938] text-[11px] font-black hover:bg-[#F9C5BD] transition">↺ 恢復預設位置</button>
-                            <button type="button" data-action="open-townshop" class="underline text-[#E87A64]">去商店解鎖更多 ➔</button>
+                            <span class="px-2.5 py-0.5 rounded-full bg-[#A8D8B9] border border-[#5C4938] inline-flex items-center gap-1 whitespace-nowrap"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M14.5 5.5L18.5 9.5L9 19H5V15L14.5 5.5Z" fill="#FFFDF9" stroke="#5C4938" stroke-width="2" stroke-linejoin="round"/></svg><span>小鎮裝潢</span></span>
+                            <span id="town-life-summary" class="hidden sm:inline">可直接拖曳地圖上的小夥伴、車車與設施擺放位置！</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
+                            <button type="button" data-action="randomize-town" class="px-2.5 py-1 rounded-full bg-white border border-[#5C4938] text-[11px] font-black hover:bg-[#FCE8A6] transition inline-flex items-center gap-1 whitespace-nowrap"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="4" fill="#FCE8A6" stroke="#5C4938" stroke-width="2"/><circle cx="9" cy="9" r="1.4" fill="#5C4938"/><circle cx="15" cy="15" r="1.4" fill="#5C4938"/><circle cx="15" cy="9" r="1.4" fill="#5C4938"/><circle cx="9" cy="15" r="1.4" fill="#5C4938"/></svg><span>隨機擺放</span></button>
+                            <button type="button" data-action="reset-town" class="px-2.5 py-1 rounded-full bg-white border border-[#5C4938] text-[11px] font-black hover:bg-[#F9C5BD] transition whitespace-nowrap">↺ 重設位置</button>
+                            <button type="button" data-action="open-townshop" class="underline text-[#E87A64] whitespace-nowrap">去商店 ➔</button>
                         </div>
                     </div>
-                    <div id="map-decor-quickbar" class="flex items-center gap-2 overflow-x-auto py-1 text-xs"></div>
+                    <div id="map-decor-quickbar" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 text-xs"></div>
                 </div>
 
-                <div class="sumikko-map-wrapper">
+                <div id="full-map-wrapper" class="sumikko-map-wrapper">
                     <div class="masking-tape"></div>
-                    <div id="full-explore-map" class="w-full h-[430px] sm:h-[500px] z-10"></div>
+                    <button type="button" data-action="toggle-map-expand" data-target="full-map-wrapper" data-map="full"
+                        class="sm:hidden absolute top-3.5 right-3.5 z-[450] px-2.5 py-1.5 rounded-full bg-white/95 border-2 border-[#5C4938] text-[11px] font-black text-[#5C4938] shadow-md">
+                        放大地圖
+                    </button>
+                    <div id="full-explore-map" class="w-full h-[56vh] min-h-[370px] sm:h-[500px] z-10"></div>
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-2 px-2 text-xs font-black text-[#5C4938]">
                         <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                             <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-[#F7A072] border-2 border-[#5C4938] inline-block"></span>造型小屋：口袋收藏愛店（依商店主題變換外觀）</span>
@@ -1831,7 +1884,7 @@
             </div>
 
             <div class="sumikko-map-wrapper mb-4">
-                <div id="location-picker-map" class="w-full h-[260px] z-10"></div>
+                <div id="location-picker-map" class="w-full h-[310px] sm:h-[260px] z-10"></div>
                 <div id="location-picker-coords" class="mt-2 text-center text-[11px] font-black text-[#857262]">點擊地圖任意處或拖曳阿蝦，即可設定精準出發點</div>
             </div>
 
@@ -3622,10 +3675,17 @@
                         </div>
 
                         ${store.hasValidCoords() ? `
-                        <div class="sumikko-map-wrapper mb-4">
+                        <div id="mini-map-wrapper" class="sumikko-map-wrapper mb-4">
                             <div class="masking-tape"></div>
-                            <div id="result-mini-map" class="w-full h-[235px] z-10"></div>
-                            <div class="mt-2 flex justify-end px-1 text-[11px] font-extrabold">
+                            <button type="button" data-action="toggle-map-expand" data-target="mini-map-wrapper" data-map="mini"
+                                class="sm:hidden absolute top-3.5 right-3.5 z-[450] px-2.5 py-1.5 rounded-full bg-white/95 border-2 border-[#5C4938] text-[11px] font-black text-[#5C4938] shadow-md">
+                                放大地圖
+                            </button>
+                            <div id="result-mini-map" class="w-full h-[300px] sm:h-[245px] z-10"></div>
+                            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] font-extrabold">
+                                <button type="button" data-action="open-location-picker" class="px-2.5 py-1 rounded-full bg-white hover:bg-[#FAF6F0] border-2 border-[#5C4938] text-[#5C4938] transition">
+                                    手動微調出發點
+                                </button>
                                 <button type="button" data-action="locate-user" class="px-3 py-1 rounded-full bg-[#FCE8A6] hover:bg-[#F7A072] hover:text-white border-2 border-[#5C4938] text-[#5C4938] transition shadow-[0_2px_0_#5C4938]">
                                     畫出「我的所在地 ➔ 餐廳」覓食路線
                                 </button>
@@ -5051,6 +5111,25 @@
                     case 'switch-subtab': this.collectionCtrl.switchSubTab(el.dataset.subtab); break;
                     case 'open-townshop': this.switchTab('pokedex'); this.collectionCtrl.switchSubTab('townshop'); break;
                     case 'spin-wheel': this.wheelCtrl.startSpin(); break;
+                    case 'toggle-mobile-filters': {
+                        const body = document.getElementById('filter-panel-body');
+                        if (!body) break;
+                        const collapsed = body.classList.toggle('hidden');
+                        body.classList.add('sm:block');
+                        el.textContent = collapsed ? '展開條件' : '收合條件';
+                        break;
+                    }
+                    case 'toggle-map-expand': {
+                        const wrapper = document.getElementById(el.dataset.target);
+                        if (!wrapper) break;
+                        const expanded = wrapper.classList.toggle('map-expanded-overlay');
+                        el.textContent = expanded ? '縮小地圖' : '放大地圖';
+                        setTimeout(() => {
+                            if (el.dataset.map === 'full') this.mapCtrl.fullMap?.invalidateSize();
+                            else this.mapCtrl.miniMap?.invalidateSize();
+                        }, 80);
+                        break;
+                    }
                     case 'locate-user': this.locateUser(); break;
                     case 'open-location-picker': this.mapCtrl.openLocationPicker(); break;
                     case 'close-location-picker': this.modalCtrl.hideModal('location-picker-modal'); break;

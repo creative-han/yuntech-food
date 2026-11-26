@@ -591,6 +591,10 @@
                             </svg>
                             <span id="loc-status-label">點我定位「我的所在地」</span>
                         </button>
+                        <button type="button" data-action="open-location-picker"
+                            class="px-3 py-1.5 rounded-full bg-[#FFF9E6] hover:bg-[#FCE8A6] border-2 border-[#5C4938] text-[11px] font-extrabold text-[#5C4938] flex items-center gap-1 shadow-[0_2px_0_#DFD5C6] transition whitespace-nowrap">
+                            <span>手動選出發點</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1318,8 +1322,8 @@
                     <div id="full-explore-map" class="w-full h-[430px] sm:h-[500px] z-10"></div>
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-2 px-2 text-xs font-black text-[#5C4938]">
                         <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#F9C5BD] border-2 border-[#5C4938] inline-block"></span>愛心炸蝦：你的口袋收藏好店</span>
-                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] inline-block"></span>阿蝦旗幟：你的所在地</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-[#F7A072] border-2 border-[#5C4938] inline-block"></span>造型小屋：口袋收藏愛店（依商店主題變換外觀）</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] inline-block"></span>阿蝦定位針：你的出發點</span>
                             <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] inline-block"></span>小夥伴、車車與設施：可自由移動與拖曳佈置</span>
                         </div>
                         <span id="full-map-count-text" class="text-[#857262]">顯示雲科周邊美食地標</span>
@@ -1806,6 +1810,38 @@
         </div>
     </div>
 
+    <!-- ==================== 彈出視窗：手動設定出發點 Modal (解決電腦 IP 定位偏移) ==================== -->
+    <div id="location-picker-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#5C4938]/50 backdrop-blur-xs p-4">
+        <div class="sumikko-card corner-wall-bg w-full max-w-lg p-5 sm:p-6 animate-pop-card relative max-h-[90vh] overflow-y-auto">
+            <button type="button" data-action="close-location-picker" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border-2 border-[#5C4938] flex items-center justify-center font-black hover:bg-[#F9C5BD] transition">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 3L13 13M13 3L3 13" stroke="#5C4938" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+
+            <div class="mb-4">
+                <span class="text-xs font-black px-2.5 py-0.5 rounded-full bg-[#FCE8A6] border border-[#5C4938]">EXACT STARTING POINT</span>
+                <h3 class="font-hand text-2xl font-black text-[#5C4938] mt-1">手動設定你的出發點</h3>
+                <p class="text-xs font-bold text-[#857262] mt-0.5">電腦版 Wi-Fi 定位容易偏移數百公尺，直接點選常用地標或在地圖上點一下，即可精準計算 500m / 1km 距離！</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-3">
+                <button type="button" data-action="set-preset-loc" data-lat="23.6960" data-lng="120.5365" data-label="雲科正門" class="capsule-btn text-xs bg-white">雲科正門</button>
+                <button type="button" data-action="set-preset-loc" data-lat="23.6928" data-lng="120.5326" data-label="龍潭路美食街" class="capsule-btn text-xs bg-white">龍潭路美食街</button>
+                <button type="button" data-action="set-preset-loc" data-lat="23.6945" data-lng="120.5338" data-label="雲科宿舍區" class="capsule-btn text-xs bg-white">雲科宿舍區</button>
+                <button type="button" data-action="set-preset-loc" data-lat="23.7118" data-lng="120.5411" data-label="斗六火車站" class="capsule-btn text-xs bg-white">斗六火車站</button>
+            </div>
+
+            <div class="sumikko-map-wrapper mb-4">
+                <div id="location-picker-map" class="w-full h-[260px] z-10"></div>
+                <div id="location-picker-coords" class="mt-2 text-center text-[11px] font-black text-[#857262]">點擊地圖任意處或拖曳阿蝦，即可設定精準出發點</div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" data-action="close-location-picker" class="capsule-btn flex-1 py-2.5 bg-white">取消</button>
+                <button type="button" data-action="confirm-picked-loc" class="spin-main-btn flex-[2] py-2.5 text-base"><span>確認以此位置篩選距離</span></button>
+            </div>
+        </div>
+    </div>
+
     <!-- 手機底部浮動導覽列 -->
     <nav class="sm:hidden fixed bottom-3 left-2.5 right-2.5 z-40 mobile-bottom-nav px-1.5 py-1.5 flex items-center justify-around">
         <button type="button" id="m-tab-btn-wheel" data-action="switch-tab" data-tab="wheel" class="mobile-nav-item active">
@@ -2066,14 +2102,15 @@
 
         const GeoUtils = {
             distanceKm(lat1, lng1, lat2, lng2) {
-                if (![lat1, lng1, lat2, lng2].every((v) => typeof v === 'number' && !Number.isNaN(v))) {
+                if (![lat1, lng1, lat2, lng2].every((v) => typeof v === 'number' && Number.isFinite(v))) {
                     return null;
                 }
-                const rad1 = (lat1 * Math.PI) / 180;
-                const rad2 = (lat2 * Math.PI) / 180;
-                const cosVal = Math.sin(rad1) * Math.sin(rad2) +
-                               Math.cos(rad1) * Math.cos(rad2) * Math.cos(((lng2 - lng1) * Math.PI) / 180);
-                return Math.acos(Math.min(1, Math.max(-1, cosVal))) * 6371;
+                const toRad = (deg) => (deg * Math.PI) / 180;
+                const dLat = toRad(lat2 - lat1);
+                const dLng = toRad(lng2 - lng1);
+                const a = Math.sin(dLat / 2) ** 2 +
+                          Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * (Math.sin(dLng / 2) ** 2);
+                return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             },
 
             formatDistance(km) {
@@ -2890,19 +2927,46 @@
                     });
                 }
 
-                // 收藏好店：依目前套用的屋頂主題加上愛心標誌
+                // 收藏好店：完整呈現商店購買並套用的造型小屋（布丁屋 / 抹茶白玉屋 / 草莓蛋糕屋 / 奶油粉彩屋）＋右上角小愛心
                 const skin = this.app.userState.unlocks.activeHouseSkin || 'classic';
-                const ring = isSelected ? '<circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>' : '';
-                const roofFill = skin === 'pudding' ? '#8C583A' : (skin === 'matcha' ? '#76B58B' : (skin === 'strawberry' ? '#F9C5BD' : '#F7A072'));
+                const glow = isSelected ? '<ellipse cx="26" cy="44" rx="21" ry="6" fill="#FCE8A6" stroke="#5C4938" stroke-width="1.8"/>' : '<ellipse cx="26" cy="45" rx="17" ry="4" fill="#DFD5C6"/>';
+                let houseShape = `
+                    <rect x="10" y="21" width="32" height="22" rx="3.5" fill="#FFFDF9" stroke="#5C4938" stroke-width="2.2"/>
+                    <path d="M5 22L26 7L47 22H5Z" fill="#F7A072" stroke="#5C4938" stroke-width="2.2" stroke-linejoin="round"/>
+                    <rect x="16" y="29" width="9" height="14" rx="1.8" fill="#F3D39A" stroke="#5C4938" stroke-width="1.8"/>
+                    <rect x="29" y="28" width="8" height="8" rx="1.8" fill="#FCE8A6" stroke="#5C4938" stroke-width="1.8"/>
+                `;
+                if (skin === 'pudding') {
+                    houseShape = `
+                        <path d="M10 43L14 19H38L42 43H10Z" fill="#FCE8A6" stroke="#5C4938" stroke-width="2.2" stroke-linejoin="round"/>
+                        <path d="M10 19C10 12 42 12 42 19C42 22.5 36.5 24 33 21.5C29.5 24 22.5 24 19 21.5C15.5 24 10 22.5 10 19Z" fill="#8C583A" stroke="#5C4938" stroke-width="2"/>
+                        <circle cx="26" cy="9" r="4.5" fill="#E87A64" stroke="#5C4938" stroke-width="1.8"/>
+                        <rect x="21" y="30" width="10" height="13" rx="4.5" fill="#FFFDF9" stroke="#5C4938" stroke-width="1.8"/>
+                    `;
+                } else if (skin === 'matcha') {
+                    houseShape = `
+                        <rect x="10" y="22" width="32" height="21" rx="3.5" fill="#EAF6EE" stroke="#5C4938" stroke-width="2.2"/>
+                        <path d="M6 23C12 9 40 9 46 23H6Z" fill="#76B58B" stroke="#5C4938" stroke-width="2.2" stroke-linejoin="round"/>
+                        <circle cx="35" cy="10" r="4.2" fill="#FFFFFF" stroke="#5C4938" stroke-width="1.8"/>
+                        <circle cx="40" cy="14" r="3.6" fill="#F9C5BD" stroke="#5C4938" stroke-width="1.8"/>
+                        <rect x="21" y="29" width="10" height="14" rx="2" fill="#5C4938"/>
+                    `;
+                } else if (skin === 'strawberry') {
+                    houseShape = `
+                        <rect x="10" y="21" width="32" height="22" rx="3.5" fill="#FFF5F5" stroke="#5C4938" stroke-width="2.2"/>
+                        <path d="M7 22C10 12 42 12 45 22C41 26 36 22 32 25C28 22 24 26 20 25C16 22 11 26 7 22Z" fill="#F9C5BD" stroke="#5C4938" stroke-width="2.2"/>
+                        <path d="M26 5C22 5 21 12 26 15C31 12 30 5 26 5Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.8"/>
+                        <rect x="21" y="30" width="10" height="13" rx="4.5" fill="#F7A072" stroke="#5C4938" stroke-width="1.8"/>
+                    `;
+                }
+
                 return L.divIcon({
-                    className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 53], popupAnchor: [0, -50],
+                    className: 'custom-sumikko-house', iconSize: [52, 50], iconAnchor: [26, 45], popupAnchor: [0, -40],
                     html: `
-                        <svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
-                            ${ring}
-                            <path d="M25 53C35 41 43 30 43 20C43 10.2 35 2.5 25 2.5C15 2.5 7 10.2 7 20C7 30 15 41 25 53Z" fill="#F9C5BD" stroke="#5C4938" stroke-width="2.4"/>
-                            <rect x="15" y="18" width="20" height="14" rx="2.5" fill="#FFFDF9" stroke="#5C4938" stroke-width="1.9"/>
-                            <path d="M12 19L25 9L38 19H12Z" fill="${roofFill}" stroke="#5C4938" stroke-width="1.9" stroke-linejoin="round"/>
-                            <path d="M25 29.5C25 29.5 20.5 26.5 20.5 24C20.5 22.6 21.6 21.6 22.9 21.6C23.9 21.6 25 22.6 25 22.6C25 22.6 26.1 21.6 27.1 21.6C28.4 21.6 29.5 22.6 29.5 24C29.5 26.5 25 29.5 25 29.5Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.4" stroke-linejoin="round"/>
+                        <svg width="52" height="50" viewBox="0 0 52 50" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
+                            ${glow}
+                            ${houseShape}
+                            <path d="M42 16C42 16 36.5 12.6 36.5 9.6C36.5 7.8 37.9 6.6 39.5 6.6C40.7 6.6 42 7.7 42 7.7C42 7.7 43.3 6.6 44.5 6.6C46.1 6.6 47.5 7.8 47.5 9.6C47.5 12.6 42 16 42 16Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                     `
                 });
@@ -3296,6 +3360,83 @@
                 mapEl.classList.remove('town-time-sunset', 'town-time-night');
                 if (mode === 'sunset') mapEl.classList.add('town-time-sunset');
                 if (mode === 'night') mapEl.classList.add('town-time-night');
+            }
+
+            openLocationPicker() {
+                this.app.modalCtrl.showModal('location-picker-modal');
+                const initLat = this.app.userCoords?.lat ?? AppConfig.YUNTECH_GATE.lat;
+                const initLng = this.app.userCoords?.lng ?? AppConfig.YUNTECH_GATE.lng;
+                this.pendingPickedLoc = { lat: initLat, lng: initLng, label: this.app.userCoords?.label || '雲科正門' };
+
+                setTimeout(() => {
+                    const el = document.getElementById('location-picker-map');
+                    if (!el || typeof L === 'undefined') return;
+                    if (this.pickerMap) {
+                        this.pickerMap.remove();
+                        this.pickerMap = null;
+                    }
+                    this.pickerMap = L.map('location-picker-map', { attributionControl: false, minZoom: 12, maxZoom: 19 })
+                        .setView([initLat, initLng], 16);
+
+                    let switched = false;
+                    const gLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=zh-TW', { maxZoom: 19, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
+                    gLayer.on('tileerror', () => {
+                        if (switched || !this.pickerMap) return;
+                        switched = true;
+                        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(this.pickerMap);
+                    });
+                    gLayer.addTo(this.pickerMap);
+
+                    this.pickerMarker = L.marker([initLat, initLng], {
+                        icon: this.createPinIcon('user-shrimp'),
+                        draggable: true
+                    }).addTo(this.pickerMap);
+
+                    const updatePicked = (lat, lng, label = '地圖自訂出發點') => {
+                        this.pendingPickedLoc = { lat, lng, label };
+                        this.pickerMarker.setLatLng([lat, lng]);
+                        const info = document.getElementById('location-picker-coords');
+                        if (info) info.textContent = `已選擇：${label} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+                    };
+
+                    this.pickerMarker.on('dragend', (e) => {
+                        const ll = e.target.getLatLng();
+                        updatePicked(ll.lat, ll.lng, '地圖自訂出發點');
+                    });
+                    this.pickerMap.on('click', (e) => {
+                        updatePicked(e.latlng.lat, e.latlng.lng, '地圖自訂出發點');
+                    });
+                    updatePicked(initLat, initLng, this.pendingPickedLoc.label);
+                }, 80);
+            }
+
+            setPickerPreset(lat, lng, label) {
+                this.pendingPickedLoc = { lat, lng, label };
+                if (this.pickerMap && this.pickerMarker) {
+                    this.pickerMarker.setLatLng([lat, lng]);
+                    this.pickerMap.setView([lat, lng], 16);
+                }
+                const info = document.getElementById('location-picker-coords');
+                if (info) info.textContent = `已選擇：${label} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+            }
+
+            confirmPickedLocation() {
+                if (!this.pendingPickedLoc) return;
+                const { lat, lng, label } = this.pendingPickedLoc;
+                this.app.userCoords = { lat, lng, label, accuracy: null };
+                document.getElementById('loc-status-label').textContent = `已定位：${label}`;
+                document.getElementById('geo-hint').textContent = `以「${label}」計算距離`;
+                this.app.modalCtrl.hideModal('location-picker-modal');
+                this.app.refreshFilterMetrics();
+                if (this.app.lastDrawnStoreName) {
+                    const s = this.app.repo.findByName(this.app.lastDrawnStoreName);
+                    if (s) {
+                        s.distStr = GeoUtils.formatDistance(GeoUtils.distanceKm(lat, lng, s.lat, s.lng));
+                        this.renderMiniMap(s);
+                    }
+                }
+                if (!document.getElementById('tab-panel-map').classList.contains('hidden')) this.renderFullMap();
+                this.app.notifier.show(`已設定出發點為「${label}」！`);
             }
         }
 
@@ -4803,9 +4944,12 @@
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         const acc = Math.round(pos.coords.accuracy || 0);
-                        const hint = acc > 150
-                            ? `定位完成（誤差約 ±${acc}m，可直接拖曳地圖上的阿蝦微調位置！）`
-                            : `高精度定位完成（誤差 ±${acc}m），已畫出覓食路線！`;
+                        const hint = acc > 300
+                            ? `電腦網路定位誤差較大（約 ±${acc}m），建議點右上角「手動選出發點」更精準！`
+                            : `定位完成（誤差 ±${acc}m），已更新距離篩選基準！`;
+                        document.getElementById('geo-hint').textContent = acc > 300
+                            ? `定位誤差 ±${acc}m（可改手動選點）`
+                            : `已依你的所在地計算（±${acc}m）`;
                         applyCoords(pos.coords.latitude, pos.coords.longitude, '你的目前所在地', hint, acc);
                     },
                     (err) => {
@@ -4908,6 +5052,10 @@
                     case 'open-townshop': this.switchTab('pokedex'); this.collectionCtrl.switchSubTab('townshop'); break;
                     case 'spin-wheel': this.wheelCtrl.startSpin(); break;
                     case 'locate-user': this.locateUser(); break;
+                    case 'open-location-picker': this.mapCtrl.openLocationPicker(); break;
+                    case 'close-location-picker': this.modalCtrl.hideModal('location-picker-modal'); break;
+                    case 'set-preset-loc': this.mapCtrl.setPickerPreset(parseFloat(el.dataset.lat), parseFloat(el.dataset.lng), el.dataset.label); break;
+                    case 'confirm-picked-loc': this.mapCtrl.confirmPickedLocation(); break;
                     case 'locate-full-map': this.locateUser(() => { if (this.mapCtrl.fullMap && this.userCoords) this.mapCtrl.fullMap.setView([this.userCoords.lat, this.userCoords.lng], 16); }); break;
                     case 'center-map': this.mapCtrl.fullMap?.setView([AppConfig.YUNTECH_GATE.lat, AppConfig.YUNTECH_GATE.lng], 15); break;
 
@@ -5065,8 +5213,9 @@
                         this.userState.unlocks.activeHouseSkin = s.id;
                         this.userState.saveUnlocks();
                         this.collectionCtrl.renderTownShop();
+                        if (this.mapCtrl.fullMap) this.mapCtrl.renderFullMap();
                         this.syncAllUI();
-                        this.notifier.show(`小鎮店屋已換成「${s.name}」！`);
+                        this.notifier.show(`小鎮店屋已換成「${s.name}」！切到蝦米小鎮地圖就能看到囉～`);
                         break;
                     }
                     case 'shop-vehicle':

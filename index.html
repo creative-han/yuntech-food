@@ -1284,14 +1284,14 @@
                             <span>蝦米小鎮美食大冒險地圖</span>
                             <span class="text-xs px-2.5 py-0.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938]">自由裝潢你的小鎮</span>
                         </h2>
-                        <p class="text-xs font-bold text-[#857262] mt-0.5">你解鎖的吉祥物小夥伴、交通工具與景觀設施都能直接用滑鼠或手指拖曳擺放！</p>
+                        <p class="text-xs font-bold text-[#857262] mt-0.5">只顯示你收藏的私房愛店！小夥伴與車車會自由在鎮上漫步，也能隨時拖曳佈置你的專屬蝦米小鎮～</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <button type="button" id="btn-town-time" data-action="cycle-atmosphere" class="capsule-btn bg-[#FCE8A6] text-xs">
                             <span id="btn-town-time-text" class="inline-flex items-center gap-1.5">暖陽白天</span>
                         </button>
                         <button type="button" id="btn-toggle-cruise" data-action="toggle-cruise" class="capsule-btn bg-[#F9C5BD] text-xs">
-                            <span id="btn-toggle-cruise-text">車車巡遊中 (點我暫停)</span>
+                            <span id="btn-toggle-cruise-text">小鎮自由漫步中 (點我暫停)</span>
                         </button>
                         <button type="button" data-action="center-map" class="capsule-btn bg-white text-xs"><span>回小鎮中心</span></button>
                         <button type="button" data-action="locate-full-map" class="capsule-btn bg-[#A8D8B9] text-xs"><span>定位我</span></button>
@@ -1318,10 +1318,9 @@
                     <div id="full-explore-map" class="w-full h-[430px] sm:h-[500px] z-10"></div>
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-2 px-2 text-xs font-black text-[#5C4938]">
                         <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#F9C5BD] border-2 border-[#5C4938] inline-block"></span>愛心炸蝦：你的口袋收藏好店</span>
                             <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] inline-block"></span>阿蝦旗幟：你的所在地</span>
-                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] inline-block"></span>米米飯糰：當前選中店家</span>
-                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#F9C5BD] border-2 border-[#5C4938] inline-block"></span>愛心炸蝦：口袋收藏好店</span>
-                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-sm bg-[#FFFDF9] border-2 border-[#5C4938] inline-block"></span>可愛小房子：其他美食店家</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] inline-block"></span>小夥伴、車車與設施：可自由移動與拖曳佈置</span>
                         </div>
                         <span id="full-map-count-text" class="text-[#857262]">顯示雲科周邊美食地標</span>
                     </div>
@@ -2781,7 +2780,7 @@
         }
 
         /**
-         * MapController：管理結果小地圖與蝦米小鎮全幅互動地圖
+         * MapController：管理結果卡片 Google 街道地圖 與 蝦米小鎮佈置地圖
          */
         class MapController {
             constructor(app) {
@@ -2790,9 +2789,14 @@
                 this.fullMap = null;
                 this.fullMarkersLayer = null;
                 this.townLifeLayer = null;
-                this.vehicleMarkers = [];
-                this.cruiseAnimId = null;
-                this.isCruiseRunning = true;
+                this.roamingAgents = [];
+                this.roamAnimId = null;
+                this.isRoamRunning = true;
+
+                this.TOWN_BOUNDS = {
+                    minLat: 23.6865, maxLat: 23.7135,
+                    minLng: 120.5235, maxLng: 120.5510
+                };
 
                 this.DEFAULT_MASCOT_SPOTS = {
                     shrimp:  { lat: 23.6948, lng: 120.5335 },
@@ -2805,11 +2809,11 @@
                     pork:    { lat: 23.7090, lng: 120.5385 }
                 };
 
-                this.VEHICLE_ROUTES = {
-                    shrimp_car: { centerLat: 23.6978, centerLng: 120.5368, radiusLat: 0.0055, radiusLng: 0.0075, speed: 0.0045, phase: 0.2 },
-                    rice_bike:  { centerLat: 23.6955, centerLng: 120.5360, radiusLat: 0.0032, radiusLng: 0.0048, speed: -0.006, phase: 1.8 },
-                    boba_train: { centerLat: 23.7010, centerLng: 120.5385, radiusLat: 0.0085, radiusLng: 0.0110, speed: 0.0032, phase: 3.4 },
-                    melon_bus:  { centerLat: 23.7035, centerLng: 120.5395, radiusLat: 0.0045, radiusLng: 0.0065, speed: -0.004, phase: 4.7 }
+                this.DEFAULT_VEHICLE_SPOTS = {
+                    shrimp_car: { lat: 23.6982, lng: 120.5368 },
+                    rice_bike:  { lat: 23.6952, lng: 120.5348 },
+                    boba_train: { lat: 23.7025, lng: 120.5405 },
+                    melon_bus:  { lat: 23.7055, lng: 120.5365 }
                 };
             }
 
@@ -2852,42 +2856,61 @@
             }
 
             createPinIcon(kind, storeType = '其他', isSelected = false) {
+                // 使用者定位點：可愛阿蝦奶油黃大頭針
                 if (kind === 'user-shrimp') {
                     return L.divIcon({
                         className: 'custom-sumikko-pin', iconSize: [48, 54], iconAnchor: [24, 48], popupAnchor: [0, -44],
-                        html: '<svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)"><path d="M24 51C34 39 42 29 42 19C42 9.5 34 2 24 2C14 2 6 9.5 6 19C6 29 14 39 24 51Z" fill="#FCE8A6" stroke="#5C4938" stroke-width="2.4"/><path d="M14 14C11 20 13 28 18 31C23 33 28 31 32 28C35 22 32 14 29 12C24 10 18 10 14 14Z" fill="#F3D39A" stroke="#5C4938" stroke-width="1.8"/><circle cx="19.5" cy="21" r="1.5" fill="#5C4938"/><circle cx="27.5" cy="21" r="1.5" fill="#5C4938"/></svg>'
+                        html: `
+                            <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
+                                <path d="M24 51C34 39 42 29 42 19C42 9.5 34 2 24 2C14 2 6 9.5 6 19C6 29 14 39 24 51Z" fill="#FCE8A6" stroke="#5C4938" stroke-width="2.4"/>
+                                <path d="M19 10C17 6 22 6 23 9C25 6 29 6 28 10Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.5" stroke-linejoin="round"/>
+                                <path d="M14 14C11 20 13 28 18 31C23 33 28 31 32 28C35 22 32 14 29 12C24 10 18 10 14 14Z" fill="#F3D39A" stroke="#5C4938" stroke-width="1.8"/>
+                                <circle cx="19.5" cy="21" r="1.5" fill="#5C4938"/><circle cx="27.5" cy="21" r="1.5" fill="#5C4938"/>
+                                <path d="M22.5 22.2H24.5" stroke="#5C4938" stroke-width="1.4" stroke-linecap="round"/>
+                                <ellipse cx="16.5" cy="23" rx="2" ry="1.1" fill="#F59B90"/><ellipse cx="30.5" cy="23" rx="2" ry="1.1" fill="#F59B90"/>
+                            </svg>
+                        `
                     });
                 }
 
-                if (kind === 'fav-store') {
-                    const ring = isSelected ? '<circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>' : '';
+                // 抽中店家地標：可愛米米飯糰薄荷綠大頭針
+                if (kind === 'store-rice') {
                     return L.divIcon({
                         className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 50], popupAnchor: [0, -46],
-                        html: `<svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">${ring}<path d="M25 53C35 41 43 30 43 20C43 10.2 35 2.5 25 2.5C15 2.5 7 10.2 7 20C7 30 15 41 25 53Z" fill="#F9C5BD" stroke="#5C4938" stroke-width="2.4"/><path d="M14 15C10 21 12 31 18 34C22 36 28 36 32 34C38 31 40 21 36 15C31 11 19 11 14 15Z" fill="#F3D39A" stroke="#5C4938" stroke-width="2"/><path d="M25 35.5C25 35.5 18 31.2 18 27.6C18 25.6 19.6 24.2 21.5 24.2C23.1 24.2 25 25.7 25 25.7C25 25.7 26.9 24.2 28.5 24.2C30.4 24.2 32 25.6 32 27.6C32 31.2 25 35.5 25 35.5Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.6"/></svg>`
+                        html: `
+                            <svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
+                                <circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>
+                                <path d="M25 53C35 41 43 30 43 20C43 10.2 35 2.5 25 2.5C15 2.5 7 10.2 7 20C7 30 15 41 25 53Z" fill="#A8D8B9" stroke="#5C4938" stroke-width="2.4"/>
+                                <path d="M25 9C33 9 37 18 36 27C35 31 30 33 25 33C20 33 15 31 14 27C13 18 17 9 25 9Z" fill="#FFFFFF" stroke="#5C4938" stroke-width="1.8"/>
+                                <rect x="20" y="25" width="10" height="8" rx="1.5" fill="#5C4938"/>
+                                <circle cx="20.5" cy="20.5" r="1.5" fill="#5C4938"/><circle cx="29.5" cy="20.5" r="1.5" fill="#5C4938"/>
+                                <ellipse cx="18" cy="22" rx="2" ry="1.1" fill="#F9C5BD"/><ellipse cx="32" cy="22" rx="2" ry="1.1" fill="#F9C5BD"/>
+                            </svg>
+                        `
                     });
                 }
 
-                if (kind === 'store-house') {
-                    const skin = this.app.userState.unlocks.activeHouseSkin || 'classic';
-                    const roofColors = { 西式: '#F9C5BD', 日式: '#D9C8EC', 飲料: '#BBE2F2', 其他異國料理: '#FCE8A6' };
-                    const roof = roofColors[storeType] || '#F7A072';
-                    let bodySvg = `<rect x="7" y="15" width="22" height="16" rx="3" fill="#FFFDF9" stroke="#5C4938" stroke-width="2"/><path d="M4 16L18 5L32 16H4Z" fill="${roof}" stroke="#5C4938" stroke-width="2" stroke-linejoin="round"/>`;
-                    if (skin === 'pudding') bodySvg = '<path d="M7 31L9 14H27L29 31H7Z" fill="#FCE8A6" stroke="#5C4938" stroke-width="2"/><path d="M7 14C7 10 29 10 29 14C29 17 25 18 23 16C21 18 15 18 13 16C11 18 7 17 7 14Z" fill="#8C583A" stroke="#5C4938" stroke-width="1.8"/><circle cx="18" cy="7.5" r="3" fill="#E87A64" stroke="#5C4938" stroke-width="1.5"/>';
-                    else if (skin === 'matcha') bodySvg = '<rect x="7" y="16" width="22" height="15" rx="3" fill="#EAF6EE" stroke="#5C4938" stroke-width="2"/><path d="M4 17C8 7 28 7 32 17H4Z" fill="#76B58B" stroke="#5C4938" stroke-width="2"/>';
-                    else if (skin === 'strawberry') bodySvg = '<rect x="7" y="15" width="22" height="16" rx="3" fill="#FFF5F5" stroke="#5C4938" stroke-width="2"/><path d="M5 16C7 9 29 9 31 16C28 19 25 16 22 18C19 16 17 19 14 18C11 16 8 19 5 16Z" fill="#F9C5BD" stroke="#5C4938" stroke-width="2"/>';
-
-                    return L.divIcon({
-                        className: 'custom-sumikko-house', iconSize: [36, 36], iconAnchor: [18, 32], popupAnchor: [0, -28],
-                        html: `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="filter:drop-shadow(0 2px 0 #5C4938)"><ellipse cx="18" cy="32" rx="13" ry="3" fill="#DFD5C6"/>${bodySvg}</svg>`
-                    });
-                }
-
+                // 收藏好店：依目前套用的屋頂主題加上愛心標誌
+                const skin = this.app.userState.unlocks.activeHouseSkin || 'classic';
+                const ring = isSelected ? '<circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>' : '';
+                const roofFill = skin === 'pudding' ? '#8C583A' : (skin === 'matcha' ? '#76B58B' : (skin === 'strawberry' ? '#F9C5BD' : '#F7A072'));
                 return L.divIcon({
                     className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 50], popupAnchor: [0, -46],
-                    html: '<svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)"><circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/><path d="M25 53C35 41 43 30 43 20C43 10.2 35 2.5 25 2.5C15 2.5 7 10.2 7 20C7 30 15 41 25 53Z" fill="#A8D8B9" stroke="#5C4938" stroke-width="2.4"/><path d="M25 9C33 9 37 18 36 27C35 31 30 33 25 33C20 33 15 31 14 27C13 18 17 9 25 9Z" fill="#FFFFFF" stroke="#5C4938" stroke-width="1.8"/><rect x="20" y="25" width="10" height="8" rx="1.5" fill="#5C4938"/></svg>'
+                    html: `
+                        <svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
+                            ${ring}
+                            <path d="M25 53C35 41 43 30 43 20C43 10.2 35 2.5 25 2.5C15 2.5 7 10.2 7 20C7 30 15 41 25 53Z" fill="#F9C5BD" stroke="#5C4938" stroke-width="2.4"/>
+                            <rect x="15" y="18" width="20" height="14" rx="2.5" fill="#FFFDF9" stroke="#5C4938" stroke-width="1.9"/>
+                            <path d="M12 19L25 9L38 19H12Z" fill="${roofFill}" stroke="#5C4938" stroke-width="1.9" stroke-linejoin="round"/>
+                            <path d="M25 29.5C25 29.5 20.5 26.5 20.5 24C20.5 22.6 21.6 21.6 22.9 21.6C23.9 21.6 25 22.6 25 22.6C25 22.6 26.1 21.6 27.1 21.6C28.4 21.6 29.5 22.6 29.5 24C29.5 26.5 25 29.5 25 29.5Z" fill="#E87A64" stroke="#5C4938" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                    `
                 });
             }
 
+            /**
+             * 1. 篩選結果頁面的地圖：直接使用 Google 街道地圖，只標示使用者目前位置與店家位置
+             */
             renderMiniMap(store) {
                 const container = document.getElementById('result-mini-map');
                 if (!container || typeof L === 'undefined' || !store.hasValidCoords()) return;
@@ -2897,38 +2920,62 @@
                 }
 
                 this.miniMap = L.map('result-mini-map', {
-                    zoomControl: true, scrollWheelZoom: false, attributionControl: false, minZoom: 12, maxZoom: 18
-                }).setView([store.mapLat, store.mapLng], 15);
+                    zoomControl: true,
+                    scrollWheelZoom: false,
+                    attributionControl: false,
+                    minZoom: 12,
+                    maxZoom: 19
+                }).setView([store.lat, store.lng], 16);
 
-                this.addWorldLayer(this.miniMap);
-
-                this.app.repo.allStores.forEach((s) => {
-                    if (!s.hasValidCoords() || s.name === store.name) return;
-                    const isFav = this.app.userState.favorites.includes(s.name);
-                    L.marker([s.mapLat, s.mapLng], {
-                        icon: this.createPinIcon(isFav ? 'fav-store' : 'store-house', s.type, false),
-                        zIndexOffset: isFav ? 300 : 0
-                    }).addTo(this.miniMap).bindPopup(`<div class="text-center px-2 py-1"><div class="font-black text-xs">${FormatUtils.escapeHtml(s.name)}</div><div class="text-[11px] font-bold text-[#857262]">${FormatUtils.escapeHtml(s.type)} · ~${s.priceLevel}元</div></div>`);
+                // 載入繁體中文 Google 街道地圖圖磚（若環境受限自動切換 ArcGIS 街道圖）
+                let switchedFallback = false;
+                const googleLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=zh-TW', {
+                    maxZoom: 19,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
                 });
+                googleLayer.on('tileerror', () => {
+                    if (switchedFallback || !this.miniMap) return;
+                    switchedFallback = true;
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                        maxZoom: 19
+                    }).addTo(this.miniMap);
+                });
+                googleLayer.addTo(this.miniMap);
 
+                // 店家位置（維持可愛米米飯糰 / 收藏愛心小屋地標）
                 const isFav = this.app.userState.favorites.includes(store.name);
-                L.marker([store.mapLat, store.mapLng], {
+                const distNote = store.distStr ? ` · 距離約 ${FormatUtils.escapeHtml(store.distStr)}` : '';
+                L.marker([store.lat, store.lng], {
                     icon: this.createPinIcon(isFav ? 'fav-store' : 'store-rice', store.type, true),
                     zIndexOffset: 900
-                }).addTo(this.miniMap).bindPopup(`<div class="text-center px-2 py-1"><div class="font-black text-sm">${FormatUtils.escapeHtml(store.name)}</div><div class="text-xs font-bold text-[#857262]">${FormatUtils.escapeHtml(store.type)} · ~${store.priceLevel}元</div></div>`).openPopup();
+                }).addTo(this.miniMap).bindPopup(`
+                    <div class="text-center px-2 py-1">
+                        <div class="font-black text-sm text-[#5C4938]">${FormatUtils.escapeHtml(store.name)}</div>
+                        <div class="text-xs font-bold text-[#857262]">${FormatUtils.escapeHtml(store.type)} · ~${store.priceLevel}元${distNote}</div>
+                    </div>
+                `).openPopup();
 
+                // 使用者目前位置（維持可愛阿蝦定位大頭針）與珊瑚紅路徑虛線
                 if (this.app.userCoords) {
-                    L.marker([this.app.userCoords.lat, this.app.userCoords.lng], {
-                        icon: this.createPinIcon('user-shrimp'), zIndexOffset: 1000
-                    }).addTo(this.miniMap).bindPopup(`<div class="font-black text-xs px-1">出發點：${FormatUtils.escapeHtml(this.app.userCoords.label)}</div>`);
+                    const { lat, lng, label } = this.app.userCoords;
+                    L.marker([lat, lng], {
+                        icon: this.createPinIcon('user-shrimp'),
+                        zIndexOffset: 1000
+                    }).addTo(this.miniMap).bindPopup(`<div class="font-black text-xs px-1 text-[#5C4938]">出發點：${FormatUtils.escapeHtml(label)}</div>`);
 
-                    const line = L.polyline([[this.app.userCoords.lat, this.app.userCoords.lng], [store.mapLat, store.mapLng]], {
-                        color: '#E87A64', weight: 4, dashArray: '7, 8', opacity: 0.95
+                    const routeLine = L.polyline([[lat, lng], [store.lat, store.lng]], {
+                        color: '#E87A64',
+                        weight: 4,
+                        dashArray: '7, 8',
+                        opacity: 0.95
                     }).addTo(this.miniMap);
-                    this.miniMap.fitBounds(line.getBounds(), { padding: [38, 38], maxZoom: 16 });
+                    this.miniMap.fitBounds(routeLine.getBounds(), { padding: [42, 42], maxZoom: 17 });
                 }
             }
 
+            /**
+             * 2. 蝦米小鎮地圖：只顯示使用者收藏的店家 + 自由移動的小夥伴/車車 + 純圖案無文字設施
+             */
             renderFullMap() {
                 const container = document.getElementById('full-explore-map');
                 if (!container || typeof L === 'undefined') return;
@@ -2951,17 +2998,16 @@
                     }).addTo(this.fullMarkersLayer).bindPopup(`<div class="font-black text-xs p-1">出發點：${FormatUtils.escapeHtml(this.app.userCoords.label)}</div>`);
                 }
 
-                let validCount = 0;
-                this.app.repo.allStores.forEach((s) => {
-                    if (!s.hasValidCoords()) return;
-                    validCount++;
-                    const isFav = this.app.userState.favorites.includes(s.name);
-                    const isSelected = this.app.lastDrawnStoreName === s.name;
-                    const kind = isFav ? 'fav-store' : (isSelected ? 'store-rice' : 'store-house');
+                // 只顯示使用者收藏的店家
+                const favStores = this.app.repo.allStores.filter(
+                    (s) => s.hasValidCoords() && this.app.userState.favorites.includes(s.name)
+                );
 
+                favStores.forEach((s) => {
+                    const isSelected = this.app.lastDrawnStoreName === s.name;
                     const marker = L.marker([s.mapLat, s.mapLng], {
-                        icon: this.createPinIcon(kind, s.type, isSelected),
-                        zIndexOffset: isSelected ? 900 : (isFav ? 400 : 100)
+                        icon: this.createPinIcon('fav-store', s.type, isSelected),
+                        zIndexOffset: isSelected ? 900 : 400
                     }).addTo(this.fullMarkersLayer);
 
                     const safeNameAttr = FormatUtils.escapeHtml(s.name);
@@ -2985,72 +3031,132 @@
                 const countEl = document.getElementById('full-map-count-text');
                 if (countEl) {
                     const u = this.app.userState.unlocks;
-                    countEl.textContent = `蝦米小鎮上共有 ${validCount} 間美食小屋、${u.mascots.length} 位小夥伴與 ${u.decors.length} 座設施`;
+                    countEl.textContent = favStores.length > 0
+                        ? `已顯示 ${favStores.length} 間收藏愛店、${u.mascots.length} 位小夥伴與 ${u.decors.length} 座設施`
+                        : `尚未收藏店家（點愛心收藏後就會出現在小鎮！）· 目前有 ${u.mascots.length} 位小夥伴與 ${u.decors.length} 座設施`;
                 }
+            }
+
+            pickRandomTownTarget() {
+                const b = this.TOWN_BOUNDS;
+                return {
+                    lat: b.minLat + Math.random() * (b.maxLat - b.minLat),
+                    lng: b.minLng + Math.random() * (b.maxLng - b.minLng)
+                };
             }
 
             renderTownLife() {
                 this.stopCruise();
-                this.vehicleMarkers = [];
+                this.roamingAgents = [];
                 const u = this.app.userState.unlocks;
 
-                // 吉祥物
+                // 1. 吉祥物小夥伴（自由在整個小鎮漫步 ＋ 隨時可拖曳擺放，不顯示干擾文字牌）
                 u.mascots.forEach((mId) => {
                     const ch = AppConfig.MASCOT_CHARACTERS.find((c) => c.id === mId);
                     if (!ch) return;
                     const pos = u.customTownPositions[`mascot_${mId}`] || this.DEFAULT_MASCOT_SPOTS[mId] || AppConfig.YUNTECH_GATE;
                     const icon = L.divIcon({
-                        className: 'custom-town-mascot', iconSize: [52, 56], iconAnchor: [26, 48], popupAnchor: [0, -44],
-                        html: `<div class="flex flex-col items-center cursor-grab"><div class="px-2 rounded-full bg-white/95 border-2 border-[#5C4938] text-[10px] font-black -mb-1 z-10">${ch.name.split('（')[0]}</div><div class="w-12 h-12 rounded-full bg-white/90 border-2 border-[#5C4938] flex items-center justify-center shadow-[0_3px_0_#5C4938] squishy-idle p-0.5">${ch.svg.replace('w-16 h-16', 'w-10 h-10')}</div></div>`
+                        className: 'custom-town-mascot', iconSize: [48, 48], iconAnchor: [24, 42], popupAnchor: [0, -38],
+                        html: `<div class="w-12 h-12 rounded-full bg-white/95 border-2 border-[#5C4938] flex items-center justify-center shadow-[0_3px_0_#5C4938] squishy-idle p-0.5 cursor-grab active:cursor-grabbing">${ch.svg.replace('w-16 h-16', 'w-10 h-10')}</div>`
                     });
-                    const m = L.marker([pos.lat, pos.lng], { icon, draggable: true, zIndexOffset: 650 }).addTo(this.townLifeLayer);
-                    m.on('dragend', (e) => {
+                    const marker = L.marker([pos.lat, pos.lng], { icon, draggable: true, zIndexOffset: 650 }).addTo(this.townLifeLayer);
+                    marker.bindPopup(`
+                        <div class="p-1.5 text-center min-w-[160px]">
+                            <span class="px-2 py-0.5 rounded-full bg-[#FCE8A6] border border-[#5C4938] text-[10px] font-black">${FormatUtils.escapeHtml(ch.role)}</span>
+                            <div class="font-hand font-black text-base text-[#5C4938] mt-1">${FormatUtils.escapeHtml(ch.name)}</div>
+                            <p class="text-[11px] font-bold text-[#857262] mt-1">${FormatUtils.escapeHtml(ch.story)}</p>
+                        </div>
+                    `);
+
+                    const agent = {
+                        kind: 'mascot',
+                        storageKey: `mascot_${mId}`,
+                        marker,
+                        lat: pos.lat,
+                        lng: pos.lng,
+                        target: this.pickRandomTownTarget(),
+                        speed: 0.000018 + Math.random() * 0.000012,
+                        dragging: false
+                    };
+                    marker.on('dragstart', () => { agent.dragging = true; });
+                    marker.on('dragend', (e) => {
                         const ll = e.target.getLatLng();
-                        u.customTownPositions[`mascot_${mId}`] = { lat: ll.lat, lng: ll.lng };
+                        agent.lat = ll.lat;
+                        agent.lng = ll.lng;
+                        agent.target = this.pickRandomTownTarget();
+                        agent.dragging = false;
+                        u.customTownPositions[agent.storageKey] = { lat: ll.lat, lng: ll.lng };
                         this.app.userState.saveUnlocks();
-                        this.app.notifier.show(`已將「${ch.name.split('（')[0]}」擺放到小鎮新位置！`);
+                        this.app.notifier.show(`已將「${ch.name.split('（')[0]}」移動到小鎮新位置！`);
                     });
+                    this.roamingAgents.push(agent);
                 });
 
-                // 交通工具
+                // 2. 交通工具（自由在整個小鎮漫遊移動 ＋ 隨時可拖曳停放，不顯示干擾文字牌）
                 const activeVehicles = u.activeVehiclesOnMap.filter((id) => u.vehicles.includes(id));
-                activeVehicles.forEach((vId, idx) => {
+                activeVehicles.forEach((vId) => {
                     const vObj = AppConfig.TOWN_VEHICLES.find((v) => v.id === vId);
                     if (!vObj) return;
-                    const route = this.VEHICLE_ROUTES[vId] || this.VEHICLE_ROUTES.shrimp_car;
-                    const saved = u.customTownPositions[`vehicle_${vId}`];
-                    const angle = route.phase + idx * 1.2;
-                    const lat = saved ? saved.lat : route.centerLat + Math.sin(angle) * route.radiusLat;
-                    const lng = saved ? saved.lng : route.centerLng + Math.cos(angle) * route.radiusLng;
+                    const pos = u.customTownPositions[`vehicle_${vId}`] || this.DEFAULT_VEHICLE_SPOTS[vId] || AppConfig.YUNTECH_GATE;
 
                     const icon = L.divIcon({
-                        className: 'custom-town-vehicle', iconSize: [60, 52], iconAnchor: [30, 42], popupAnchor: [0, -38],
-                        html: `<div class="flex flex-col items-center cursor-grab"><div class="px-2 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-[10px] font-black -mb-1.5 z-10">噗噗～${vObj.name}</div><div>${vObj.svg}</div></div>`
+                        className: 'custom-town-vehicle', iconSize: [56, 48], iconAnchor: [28, 40], popupAnchor: [0, -36],
+                        html: `<div class="cursor-grab active:cursor-grabbing drop-shadow-[0_3px_0_#5C4938]">${vObj.svg}</div>`
                     });
-                    const vm = L.marker([lat, lng], { icon, draggable: true, zIndexOffset: 720 }).addTo(this.townLifeLayer);
-                    vm.on('dragstart', () => { this.isCruiseRunning = false; this.stopCruise(); this.updateCruiseButtonUI(); });
-                    vm.on('dragend', (e) => {
+                    const marker = L.marker([pos.lat, pos.lng], { icon, draggable: true, zIndexOffset: 720 }).addTo(this.townLifeLayer);
+                    marker.bindPopup(`
+                        <div class="p-1.5 text-center min-w-[160px]">
+                            <span class="px-2 py-0.5 rounded-full bg-[#BBE2F2] border border-[#5C4938] text-[10px] font-black">小鎮巡遊專車</span>
+                            <div class="font-hand font-black text-base text-[#5C4938] mt-1">${FormatUtils.escapeHtml(vObj.name)}</div>
+                            <p class="text-[11px] font-bold text-[#857262] mt-1">${FormatUtils.escapeHtml(vObj.desc)}</p>
+                        </div>
+                    `);
+
+                    const agent = {
+                        kind: 'vehicle',
+                        storageKey: `vehicle_${vId}`,
+                        marker,
+                        lat: pos.lat,
+                        lng: pos.lng,
+                        target: this.pickRandomTownTarget(),
+                        speed: 0.000038 + Math.random() * 0.000018,
+                        dragging: false
+                    };
+                    marker.on('dragstart', () => { agent.dragging = true; });
+                    marker.on('dragend', (e) => {
                         const ll = e.target.getLatLng();
-                        u.customTownPositions[`vehicle_${vId}`] = { lat: ll.lat, lng: ll.lng };
+                        agent.lat = ll.lat;
+                        agent.lng = ll.lng;
+                        agent.target = this.pickRandomTownTarget();
+                        agent.dragging = false;
+                        u.customTownPositions[agent.storageKey] = { lat: ll.lat, lng: ll.lng };
                         this.app.userState.saveUnlocks();
-                        this.app.notifier.show(`已停靠「${vObj.name}」！`);
+                        this.app.notifier.show(`已將「${vObj.name}」停放到小鎮新位置！`);
                     });
-                    this.vehicleMarkers.push({ marker: vm, route, angle });
+                    this.roamingAgents.push(agent);
                 });
 
-                // 設施
+                // 3. 景觀與遊樂場設施（純手繪圖示、不顯示文字標籤，支援自由拖曳擺放）
                 const activeDecors = u.activeDecorsOnMap.filter((id) => u.decors.includes(id));
                 activeDecors.forEach((dId) => {
                     const dObj = AppConfig.TOWN_DECORATIONS.find((d) => d.id === dId);
                     if (!dObj) return;
                     const saved = u.customTownPositions[`decor_${dId}`];
                     const icon = L.divIcon({
-                        className: 'custom-town-decor', iconSize: [64, 64], iconAnchor: [32, 54], popupAnchor: [0, -48],
-                        html: `<div class="flex flex-col items-center cursor-grab"><div class="px-2 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] text-[10px] font-black -mb-1.5 z-10 inline-flex items-center gap-1">${TemplateHelpers.miniIcon('ferris')}<span>${dObj.name}</span></div><div>${dObj.svg}</div></div>`
+                        className: 'custom-town-decor', iconSize: [58, 58], iconAnchor: [29, 50], popupAnchor: [0, -44],
+                        html: `<div class="cursor-grab active:cursor-grabbing drop-shadow-[0_3px_0_#5C4938] transition-transform hover:scale-110">${dObj.svg}</div>`
                     });
                     const dm = L.marker([saved ? saved.lat : dObj.defaultLat, saved ? saved.lng : dObj.defaultLng], {
                         icon, draggable: true, zIndexOffset: 680
                     }).addTo(this.townLifeLayer);
+
+                    dm.bindPopup(`
+                        <div class="p-1.5 text-center min-w-[165px]">
+                            <div class="font-hand font-black text-base text-[#5C4938]">${FormatUtils.escapeHtml(dObj.name)}</div>
+                            <p class="text-[11px] font-bold text-[#857262] my-1">${FormatUtils.escapeHtml(dObj.desc)}</p>
+                            ${dId === 'ferris_wheel' ? '<button type="button" data-action="switch-tab" data-tab="arcade" class="mt-1 w-full px-3 py-1 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-black">進入蝦米遊樂場</button>' : ''}
+                        </div>
+                    `);
                     dm.on('dragend', (e) => {
                         const ll = e.target.getLatLng();
                         u.customTownPositions[`decor_${dId}`] = { lat: ll.lat, lng: ll.lng };
@@ -3060,7 +3166,7 @@
                 });
 
                 this.renderQuickbar();
-                if (this.isCruiseRunning && this.vehicleMarkers.length > 0) this.startCruise();
+                if (this.isRoamRunning && this.roamingAgents.length > 0) this.startCruise();
             }
 
             renderQuickbar() {
@@ -3078,7 +3184,7 @@
                     const v = AppConfig.TOWN_VEHICLES.find((x) => x.id === vId);
                     if (!v) return '';
                     const isOn = u.activeVehiclesOnMap.includes(vId);
-                    return `<button type="button" data-action="toggle-map-vehicle" data-id="${vId}" class="px-2.5 py-1 rounded-full border-2 border-[#5C4938] font-black whitespace-nowrap inline-flex items-center gap-1 ${isOn ? 'bg-[#F9C5BD]' : 'bg-white opacity-65'}">${TemplateHelpers.miniIcon('car')}<span>${v.name} (${isOn ? '巡遊中' : '已收起'})</span></button>`;
+                    return `<button type="button" data-action="toggle-map-vehicle" data-id="${vId}" class="px-2.5 py-1 rounded-full border-2 border-[#5C4938] font-black whitespace-nowrap inline-flex items-center gap-1 ${isOn ? 'bg-[#F9C5BD]' : 'bg-white opacity-65'}">${TemplateHelpers.miniIcon('car')}<span>${v.name} (${isOn ? '漫遊中' : '已收起'})</span></button>`;
                 }).join('');
 
                 bar.innerHTML = decorHtml + vehHtml;
@@ -3087,35 +3193,41 @@
             startCruise() {
                 this.stopCruise();
                 const step = () => {
-                    if (!this.isCruiseRunning) return;
-                    this.vehicleMarkers.forEach((item) => {
-                        item.angle += item.route.speed;
-                        item.marker.setLatLng([
-                            item.route.centerLat + Math.sin(item.angle) * item.route.radiusLat,
-                            item.route.centerLng + Math.cos(item.angle) * item.route.radiusLng
-                        ]);
+                    if (!this.isRoamRunning) return;
+                    this.roamingAgents.forEach((a) => {
+                        if (a.dragging) return;
+                        const dLat = a.target.lat - a.lat;
+                        const dLng = a.target.lng - a.lng;
+                        const dist = Math.hypot(dLat, dLng);
+                        if (dist < 0.0004) {
+                            a.target = this.pickRandomTownTarget();
+                        } else {
+                            a.lat += (dLat / dist) * a.speed;
+                            a.lng += (dLng / dist) * a.speed;
+                            a.marker.setLatLng([a.lat, a.lng]);
+                        }
                     });
-                    this.cruiseAnimId = requestAnimationFrame(step);
+                    this.roamAnimId = requestAnimationFrame(step);
                 };
-                this.cruiseAnimId = requestAnimationFrame(step);
+                this.roamAnimId = requestAnimationFrame(step);
             }
 
             stopCruise() {
-                if (this.cruiseAnimId) {
-                    cancelAnimationFrame(this.cruiseAnimId);
-                    this.cruiseAnimId = null;
+                if (this.roamAnimId) {
+                    cancelAnimationFrame(this.roamAnimId);
+                    this.roamAnimId = null;
                 }
             }
 
             toggleCruise() {
-                this.isCruiseRunning = !this.isCruiseRunning;
+                this.isRoamRunning = !this.isRoamRunning;
                 this.updateCruiseButtonUI();
-                if (this.isCruiseRunning) {
+                if (this.isRoamRunning) {
                     this.startCruise();
-                    this.app.notifier.show('噗噗～小鎮車車開始沿著街道巡遊囉！');
+                    this.app.notifier.show('小夥伴與車車開始在蝦米小鎮自由漫步囉！');
                 } else {
                     this.stopCruise();
-                    this.app.notifier.show('車車已暫停，可自由拖曳停放位置！');
+                    this.app.notifier.show('已暫停漫步，現在可以自由拖曳佈置小鎮囉！');
                 }
             }
 
@@ -3123,8 +3235,8 @@
                 const txt = document.getElementById('btn-toggle-cruise-text');
                 const btn = document.getElementById('btn-toggle-cruise');
                 if (!txt || !btn) return;
-                txt.textContent = this.isCruiseRunning ? '車車巡遊中 (點我暫停)' : '車車已停靠 (點我巡遊)';
-                btn.className = this.isCruiseRunning ? 'capsule-btn bg-[#F9C5BD] text-xs' : 'capsule-btn bg-white text-xs';
+                txt.textContent = this.isRoamRunning ? '小鎮自由漫步中 (點我暫停)' : '已暫停漫步 (點我自由移動)';
+                btn.className = this.isRoamRunning ? 'capsule-btn bg-[#F9C5BD] text-xs' : 'capsule-btn bg-white text-xs';
             }
 
             cycleAtmosphere() {

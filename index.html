@@ -2859,7 +2859,7 @@
                 // 使用者定位點：可愛阿蝦奶油黃大頭針
                 if (kind === 'user-shrimp') {
                     return L.divIcon({
-                        className: 'custom-sumikko-pin', iconSize: [48, 54], iconAnchor: [24, 48], popupAnchor: [0, -44],
+                        className: 'custom-sumikko-pin', iconSize: [48, 54], iconAnchor: [24, 51], popupAnchor: [0, -48],
                         html: `
                             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
                                 <path d="M24 51C34 39 42 29 42 19C42 9.5 34 2 24 2C14 2 6 9.5 6 19C6 29 14 39 24 51Z" fill="#FCE8A6" stroke="#5C4938" stroke-width="2.4"/>
@@ -2876,7 +2876,7 @@
                 // 抽中店家地標：可愛米米飯糰薄荷綠大頭針
                 if (kind === 'store-rice') {
                     return L.divIcon({
-                        className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 50], popupAnchor: [0, -46],
+                        className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 53], popupAnchor: [0, -50],
                         html: `
                             <svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
                                 <circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>
@@ -2895,7 +2895,7 @@
                 const ring = isSelected ? '<circle cx="25" cy="20" r="21" fill="none" stroke="#FCE8A6" stroke-width="3.5"/>' : '';
                 const roofFill = skin === 'pudding' ? '#8C583A' : (skin === 'matcha' ? '#76B58B' : (skin === 'strawberry' ? '#F9C5BD' : '#F7A072'));
                 return L.divIcon({
-                    className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 50], popupAnchor: [0, -46],
+                    className: 'custom-sumikko-pin', iconSize: [50, 56], iconAnchor: [25, 53], popupAnchor: [0, -50],
                     html: `
                         <svg width="50" height="56" viewBox="0 0 50 56" fill="none" style="filter:drop-shadow(0 3px 0 #5C4938)">
                             ${ring}
@@ -2955,13 +2955,20 @@
                     </div>
                 `).openPopup();
 
-                // 使用者目前位置（維持可愛阿蝦定位大頭針）與珊瑚紅路徑虛線
+                // 使用者目前位置（維持可愛阿蝦定位大頭針，支援拖曳微調）與珊瑚紅路徑虛線
                 if (this.app.userCoords) {
-                    const { lat, lng, label } = this.app.userCoords;
-                    L.marker([lat, lng], {
-                        icon: this.createPinIcon('user-shrimp'),
-                        zIndexOffset: 1000
-                    }).addTo(this.miniMap).bindPopup(`<div class="font-black text-xs px-1 text-[#5C4938]">出發點：${FormatUtils.escapeHtml(label)}</div>`);
+                    const { lat, lng, label, accuracy } = this.app.userCoords;
+                    const accText = accuracy && accuracy < 2000 ? `（誤差約 ±${accuracy}m）` : '';
+
+                    if (accuracy && accuracy <= 500) {
+                        L.circle([lat, lng], {
+                            radius: accuracy,
+                            color: '#E87A64',
+                            fillColor: '#FCE8A6',
+                            fillOpacity: 0.25,
+                            weight: 1.5
+                        }).addTo(this.miniMap);
+                    }
 
                     const routeLine = L.polyline([[lat, lng], [store.lat, store.lng]], {
                         color: '#E87A64',
@@ -2969,7 +2976,36 @@
                         dashArray: '7, 8',
                         opacity: 0.95
                     }).addTo(this.miniMap);
-                    this.miniMap.fitBounds(routeLine.getBounds(), { padding: [42, 42], maxZoom: 17 });
+
+                    const userMarker = L.marker([lat, lng], {
+                        icon: this.createPinIcon('user-shrimp'),
+                        draggable: true,
+                        zIndexOffset: 1000
+                    }).addTo(this.miniMap);
+
+                    userMarker.bindPopup(`
+                        <div class="text-center px-1.5 py-0.5">
+                            <div class="font-black text-xs text-[#5C4938]">出發點：${FormatUtils.escapeHtml(label)}${accText}</div>
+                            <div class="text-[10px] font-bold text-[#857262] mt-0.5">若定位有偏差，可直接拖曳阿蝦微調位置！</div>
+                        </div>
+                    `);
+
+                    userMarker.on('drag', (e) => {
+                        const ll = e.target.getLatLng();
+                        routeLine.setLatLngs([[ll.lat, ll.lng], [store.lat, store.lng]]);
+                    });
+
+                    userMarker.on('dragend', (e) => {
+                        const ll = e.target.getLatLng();
+                        this.app.userCoords = { lat: ll.lat, lng: ll.lng, label: '手動微調位置', accuracy: null };
+                        const km = GeoUtils.distanceKm(ll.lat, ll.lng, store.lat, store.lng);
+                        store.distStr = GeoUtils.formatDistance(km);
+                        document.getElementById('loc-status-label').textContent = '已定位：手動微調位置';
+                        this.app.refreshFilterMetrics();
+                        this.app.notifier.show(`已更新你的位置！距離「${store.name}」約 ${store.distStr}`);
+                    });
+
+                    this.miniMap.fitBounds(routeLine.getBounds(), { padding: [46, 46], maxZoom: 17 });
                 }
             }
 
@@ -4740,29 +4776,53 @@
 
             locateUser(onDone) {
                 const labelEl = document.getElementById('loc-status-label');
-                labelEl.textContent = '正在取得你的所在地...';
+                labelEl.textContent = '正在高精度定位中...';
 
-                const applyCoords = (lat, lng, label, msg) => {
-                    this.userCoords = { lat, lng, label };
+                const applyCoords = (lat, lng, label, msg, accuracy = null) => {
+                    this.userCoords = { lat, lng, label, accuracy };
                     labelEl.textContent = `已定位：${label}`;
                     this.refreshFilterMetrics();
                     if (msg) this.notifier.show(msg);
                     if (this.lastDrawnStoreName) {
                         const s = this.repo.findByName(this.lastDrawnStoreName);
-                        if (s) this.mapCtrl.renderMiniMap(s);
+                        if (s) {
+                            const km = GeoUtils.distanceKm(lat, lng, s.lat, s.lng);
+                            s.distStr = GeoUtils.formatDistance(km);
+                            this.mapCtrl.renderMiniMap(s);
+                        }
                     }
                     if (!document.getElementById('tab-panel-map').classList.contains('hidden')) this.mapCtrl.renderFullMap();
                     if (typeof onDone === 'function') onDone();
                 };
 
                 if (!navigator.geolocation) {
-                    applyCoords(23.6928, 120.5332, '雲科校門', '已設定預設出發點並畫出路線！');
+                    applyCoords(AppConfig.YUNTECH_GATE.lat, AppConfig.YUNTECH_GATE.lng, '雲科校門(預設)', '瀏覽器不支援定位，已先以雲科校門為出發點（可拖曳阿蝦微調）！');
                     return;
                 }
+
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => applyCoords(pos.coords.latitude, pos.coords.longitude, '你的目前所在地', '已從你的所在地畫出覓食路線！'),
-                    () => applyCoords(23.6928, 120.5332, '雲科校門', '尚未開啟定位權限，已以雲科校門為出發點！'),
-                    { timeout: 6000 }
+                    (pos) => {
+                        const acc = Math.round(pos.coords.accuracy || 0);
+                        const hint = acc > 150
+                            ? `定位完成（誤差約 ±${acc}m，可直接拖曳地圖上的阿蝦微調位置！）`
+                            : `高精度定位完成（誤差 ±${acc}m），已畫出覓食路線！`;
+                        applyCoords(pos.coords.latitude, pos.coords.longitude, '你的目前所在地', hint, acc);
+                    },
+                    (err) => {
+                        const reasonMap = {
+                            1: '瀏覽器未允許定位權限',
+                            2: '目前無法取得裝置定位訊號',
+                            3: 'GPS 定位逾時'
+                        };
+                        const reason = reasonMap[err?.code] || '無法取得即時定位';
+                        applyCoords(
+                            AppConfig.YUNTECH_GATE.lat,
+                            AppConfig.YUNTECH_GATE.lng,
+                            '雲科校門(預設)',
+                            `${reason}，已先以雲科校門為出發點（可拖曳地圖上的阿蝦調整）！`
+                        );
+                    },
+                    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
                 );
             }
 

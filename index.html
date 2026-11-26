@@ -1013,7 +1013,7 @@
                     </div>
                     <div class="flex flex-wrap items-center justify-center gap-2">
                         <button type="button" id="arcade-mode-btn-quiz" data-action="switch-arcade" data-mode="quiz" class="capsule-btn active">
-                            <span>遊戲 1：雲科店名大猜謎</span>
+                            <span>遊戲 1：斗六店名猜猜樂</span>
                         </button>
                         <button type="button" id="arcade-mode-btn-catcher" data-action="switch-arcade" data-mode="catcher" class="capsule-btn">
                             <span>遊戲 2：阿蝦接接樂</span>
@@ -1022,57 +1022,79 @@
                 </div>
             </section>
 
-            <!-- 遊戲 1：雲科店名大猜謎 -->
+            <!-- 遊戲 1：斗六店名猜猜樂 (限時 45 秒、每日限玩 1 次、隨機挖空不重複) -->
             <section id="arcade-game-quiz" class="sumikko-card p-5 sm:p-6 bg-white">
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-[#EAE2D6] pb-3 mb-5">
-                    <div class="flex items-center gap-2">
-                        <span class="px-3 py-1 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">每題答對 +25 蝦米幣</span>
-                        <span id="quiz-streak-badge" class="px-3 py-1 rounded-full bg-[#FAF6F0] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">連續答對：0 題</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="quiz-daily-badge" class="px-3 py-1 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">今日剩餘：1 / 1 次</span>
+                        <span id="quiz-time-badge" class="px-3 py-1 rounded-full bg-[#F9C5BD] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">剩餘時間：45s</span>
+                        <span id="quiz-score-badge" class="px-3 py-1 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">答對：0 題</span>
+                        <span id="quiz-streak-badge" class="px-3 py-1 rounded-full bg-[#FAF6F0] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">連對：0 題</span>
                     </div>
-                    <button type="button" data-action="next-quiz" class="capsule-btn text-xs bg-[#FAF6F0]">
-                        <span>換下一題 ➔</span>
+                    <button type="button" id="btn-start-quiz-top" data-action="start-quiz" class="capsule-btn bg-[#F7A072] text-white text-xs">
+                        <span>開始挑戰</span>
                     </button>
                 </div>
 
-                <div class="max-w-xl mx-auto text-center py-2">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl bg-[#FFF9E6] border-2 border-dashed border-[#5C4938] text-xs sm:text-sm font-bold text-[#857262] mb-4">
-                        <span id="quiz-hint-text">提示載入中...</span>
+                <div class="max-w-xl mx-auto text-center py-2 relative min-h-[300px]">
+                    <!-- 遊戲待機 / 結算 / 今日已玩遮罩 -->
+                    <div id="quiz-overlay" class="sumikko-card-sm corner-wall-bg p-6 flex flex-col items-center justify-center text-center">
+                        <svg class="w-16 h-16 squishy-idle mb-2" viewBox="0 0 64 64" fill="none">
+                            <path d="M23 14C19 7 26 5 29 11C32 5 39 6 37 12C43 8 46 14 40 18Z" fill="#E87A64" stroke="#5C4938" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M16 20C11 28 13 44 21 49C28 53 36 53 43 49C51 44 53 28 48 20C41 15 23 15 16 20Z" fill="#F3D39A" stroke="#5C4938" stroke-width="2.2"/>
+                            <circle cx="24" cy="33" r="2" fill="#5C4938"/><circle cx="40" cy="33" r="2" fill="#5C4938"/>
+                            <path d="M29.5 34.5Q31 36.5 32.5 34.5Q34 36.5 35.5 34.5" stroke="#5C4938" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <h3 id="quiz-overlay-title" class="font-hand text-2xl font-black text-[#5C4938]">斗六店名猜猜樂（限時 45 秒）</h3>
+                        <p id="quiz-overlay-desc" class="text-xs sm:text-sm font-bold text-[#857262] mt-1.5 mb-4">
+                            題目隨機從斗六店家洗牌抽出不重複，且隨機挖空前、中、後段字詞！每答對 1 題結算 +15 蝦米幣（每日限玩 1 次）。
+                        </p>
+                        <button type="button" id="btn-start-quiz-main" data-action="start-quiz" class="spin-main-btn max-w-xs py-2.5 text-base">
+                            <span id="quiz-overlay-btn-text">點我開始 45 秒挑戰</span>
+                        </button>
                     </div>
 
-                    <div class="sumikko-card-sm corner-wall-bg p-5 mb-5 relative">
-                        <div class="text-xs font-black text-[#857262] mb-2">請選出正確字詞填入空格，拼出完整的雲科店名！</div>
-                        <div id="quiz-store-title" class="font-hand text-2xl sm:text-3xl font-black text-[#5C4938] tracking-wide my-2 flex flex-wrap items-center justify-center gap-2">
-                            題目載入中...
+                    <!-- 進行中題目區 -->
+                    <div id="quiz-play-area" class="hidden">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl bg-[#FFF9E6] border-2 border-dashed border-[#5C4938] text-xs sm:text-sm font-bold text-[#857262] mb-4">
+                            <span id="quiz-hint-text">提示載入中...</span>
                         </div>
-                        <div class="mt-3 flex items-center justify-center gap-2 max-w-xs mx-auto">
-                            <input type="text" id="quiz-manual-input" placeholder="可直接輸入答案或點選下方字卡..."
-                                class="w-full px-3 py-1.5 rounded-full border-2 border-[#5C4938] bg-white text-xs font-bold text-[#5C4938] text-center focus:outline-none">
-                            <button type="button" data-action="submit-manual-quiz" class="capsule-btn bg-[#FCE8A6] text-xs py-1.5 px-3">填入</button>
-                        </div>
-                    </div>
 
-                    <div id="quiz-options-grid" class="grid grid-cols-2 gap-3 mb-4"></div>
-
-                    <div id="quiz-feedback-box" class="hidden sumikko-card-sm p-4 mt-4 items-center justify-between gap-3 bg-[#EAF6EE]">
-                        <div class="flex items-center gap-2.5 text-left">
-                            <div id="quiz-feedback-icon" class="w-9 h-9 rounded-full bg-white border-2 border-[#5C4938] flex items-center justify-center flex-shrink-0 font-black">O</div>
-                            <div>
-                                <div id="quiz-feedback-title" class="text-sm font-black text-[#5C4938]">答對了！</div>
-                                <div id="quiz-feedback-desc" class="text-xs font-bold text-[#857262]">太厲害了，你真是雲科美食通！</div>
+                        <div class="sumikko-card-sm corner-wall-bg p-5 mb-5 relative">
+                            <div class="text-xs font-black text-[#857262] mb-2">請選出正確字詞填入空格，拼出完整的斗六店名！</div>
+                            <div id="quiz-store-title" class="font-hand text-2xl sm:text-3xl font-black text-[#5C4938] tracking-wide my-2 flex flex-wrap items-center justify-center gap-2">
+                                題目載入中...
+                            </div>
+                            <div class="mt-3 flex items-center justify-center gap-2 max-w-xs mx-auto">
+                                <input type="text" id="quiz-manual-input" placeholder="可直接輸入答案或點選下方字卡..."
+                                    class="w-full px-3 py-1.5 rounded-full border-2 border-[#5C4938] bg-white text-xs font-bold text-[#5C4938] text-center focus:outline-none">
+                                <button type="button" data-action="submit-manual-quiz" class="capsule-btn bg-[#FCE8A6] text-xs py-1.5 px-3">填入</button>
                             </div>
                         </div>
-                        <button type="button" data-action="next-quiz" class="capsule-btn bg-[#FCE8A6] text-xs whitespace-nowrap">
-                            <span>繼續挑戰下一題</span>
-                        </button>
+
+                        <div id="quiz-options-grid" class="grid grid-cols-2 gap-3 mb-4"></div>
+
+                        <div id="quiz-feedback-box" class="hidden sumikko-card-sm p-3.5 mt-3 items-center justify-between gap-3 bg-[#EAF6EE]">
+                            <div class="flex items-center gap-2.5 text-left">
+                                <div id="quiz-feedback-icon" class="w-8 h-8 rounded-full bg-white border-2 border-[#5C4938] flex items-center justify-center flex-shrink-0 font-black">O</div>
+                                <div>
+                                    <div id="quiz-feedback-title" class="text-sm font-black text-[#5C4938]">答對了！</div>
+                                    <div id="quiz-feedback-desc" class="text-xs font-bold text-[#857262]">準備進入下一題...</div>
+                                </div>
+                            </div>
+                            <button type="button" data-action="next-quiz" class="capsule-btn bg-[#FCE8A6] text-xs whitespace-nowrap">
+                                <span>下一題 ➔</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 遊戲 2：阿蝦接接樂 -->
+            <!-- 遊戲 2：阿蝦接接樂 (每日限玩 1 次、完整手繪食物掉落圖) -->
             <section id="arcade-game-catcher" class="hidden sumikko-card p-5 sm:p-6 bg-white">
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-[#EAE2D6] pb-3 mb-4">
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="px-3 py-1 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">計時：30 秒</span>
+                        <span id="catcher-daily-badge" class="px-3 py-1 rounded-full bg-[#A8D8B9] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">今日剩餘：1 / 1 次</span>
                         <span id="catcher-score-badge" class="px-3 py-1 rounded-full bg-[#FCE8A6] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">目前分數：0</span>
                         <span id="catcher-time-badge" class="px-3 py-1 rounded-full bg-[#F9C5BD] border-2 border-[#5C4938] text-xs font-black whitespace-nowrap">剩餘時間：30s</span>
                     </div>
@@ -1095,7 +1117,7 @@
                             </svg>
                             <h3 id="catcher-overlay-title" class="font-hand text-2xl font-black text-[#5C4938]">阿蝦米米接美食大作戰</h3>
                             <p id="catcher-overlay-desc" class="text-xs font-bold text-[#857262] mt-1 mb-4">接越多美食，結算就能換越多酥脆蝦米幣喔！</p>
-                            <button type="button" data-action="start-catcher" class="spin-main-btn max-w-xs py-2.5 text-base">
+                            <button type="button" id="btn-start-catcher-main" data-action="start-catcher" class="spin-main-btn max-w-xs py-2.5 text-base">
                                 <span id="catcher-overlay-btn-text">點我開始遊戲</span>
                             </button>
                         </div>
@@ -2367,7 +2389,7 @@
                 this.reviews = {};
                 this.hiddenToday = [];
                 this.customStores = [];
-                this.economy = { coins: 50, streak: 0, lastCheckInDate: '', lastSpinRewardDate: '' };
+                this.economy = { coins: 50, streak: 0, lastCheckInDate: '', lastSpinRewardDate: '', lastQuizPlayDate: '', lastCatcherPlayDate: '' };
                 this.unlocks = {
                     mascots: ['shrimp', 'rice'],
                     houseSkins: ['classic'],
@@ -3338,16 +3360,77 @@
         }
 
         /**
-         * ArcadeController：管理遊樂場兩款小遊戲 (雲科店名填空猜謎 & 阿蝦接接樂)
+         * ArcadeController：管理遊樂場兩款小遊戲 (斗六店名猜猜樂 ＆ 阿蝦接接樂，皆為每日限玩 1 次)
          */
         class ArcadeController {
             constructor(app) {
                 this.app = app;
-                this.currentQuiz = null;
-                this.quizStreak = 0;
-                this.quizAnswered = false;
-                this.catcher = { isRunning: false, score: 0, timeLeft: 30, bowlX: 190, items: [], popups: [], animId: null, timerId: null };
+                this.QUIZ_DURATION = 45;
+                this.quiz = {
+                    isRunning: false,
+                    timeLeft: 45,
+                    correctCount: 0,
+                    streak: 0,
+                    answered: false,
+                    current: null,
+                    deck: [],
+                    deckIdx: 0,
+                    timerId: null,
+                    autoNextId: null
+                };
+                this.catcher = {
+                    isRunning: false,
+                    score: 0,
+                    timeLeft: 30,
+                    bowlX: 190,
+                    items: [],
+                    popups: [],
+                    animId: null,
+                    timerId: null
+                };
                 this.bindCanvasInput();
+            }
+
+            hasPlayedQuizToday() {
+                return this.app.userState.economy.lastQuizPlayDate === FormatUtils.getTodayIsoDate();
+            }
+
+            hasPlayedCatcherToday() {
+                return this.app.userState.economy.lastCatcherPlayDate === FormatUtils.getTodayIsoDate();
+            }
+
+            syncDailyLimitUI() {
+                const quizPlayed = this.hasPlayedQuizToday();
+                const quizBadge = document.getElementById('quiz-daily-badge');
+                const quizTopBtn = document.getElementById('btn-start-quiz-top');
+                const quizMainBtn = document.getElementById('btn-start-quiz-main');
+                if (quizBadge) {
+                    quizBadge.textContent = quizPlayed ? '今日已遊玩 (0 / 1 次)' : '今日剩餘：1 / 1 次';
+                    quizBadge.className = `px-3 py-1 rounded-full border-2 border-[#5C4938] text-xs font-black whitespace-nowrap ${quizPlayed ? 'bg-[#E5DDD0] text-[#857262]' : 'bg-[#A8D8B9]'}`;
+                }
+                if (quizTopBtn) quizTopBtn.disabled = quizPlayed || this.quiz.isRunning;
+                if (quizMainBtn) quizMainBtn.disabled = quizPlayed;
+                if (quizPlayed && !this.quiz.isRunning) {
+                    document.getElementById('quiz-overlay-title').textContent = '今日已完成斗六店名猜猜樂！';
+                    document.getElementById('quiz-overlay-desc').textContent = '每天限玩 1 次領取蝦米幣，明天再來挑戰新題目吧！';
+                    document.getElementById('quiz-overlay-btn-text').textContent = '今日次數已用完';
+                }
+
+                const catcherPlayed = this.hasPlayedCatcherToday();
+                const catchBadge = document.getElementById('catcher-daily-badge');
+                const catchTopBtn = document.getElementById('btn-start-catcher');
+                const catchMainBtn = document.getElementById('btn-start-catcher-main');
+                if (catchBadge) {
+                    catchBadge.textContent = catcherPlayed ? '今日已遊玩 (0 / 1 次)' : '今日剩餘：1 / 1 次';
+                    catchBadge.className = `px-3 py-1 rounded-full border-2 border-[#5C4938] text-xs font-black whitespace-nowrap ${catcherPlayed ? 'bg-[#E5DDD0] text-[#857262]' : 'bg-[#A8D8B9]'}`;
+                }
+                if (catchTopBtn) catchTopBtn.disabled = catcherPlayed || this.catcher.isRunning;
+                if (catchMainBtn) catchMainBtn.disabled = catcherPlayed;
+                if (catcherPlayed && !this.catcher.isRunning) {
+                    document.getElementById('catcher-overlay-title').textContent = '今日已完成阿蝦接接樂！';
+                    document.getElementById('catcher-overlay-desc').textContent = '每天限玩 1 次領取蝦米幣，明天再來陪阿蝦米米接美食吧！';
+                    document.getElementById('catcher-overlay-btn-text').textContent = '今日次數已用完';
+                }
             }
 
             switchGame(mode) {
@@ -3360,48 +3443,143 @@
                     if (this.catcher.isRunning) this.stopCatcher(false);
                     quizSec.classList.remove('hidden');
                     catchSec.classList.add('hidden');
-                    if (!this.currentQuiz) this.nextQuiz();
                 } else {
+                    if (this.quiz.isRunning) this.stopQuiz(false);
                     quizSec.classList.add('hidden');
                     catchSec.classList.remove('hidden');
                 }
+                this.syncDailyLimitUI();
+            }
+
+            /* --- 遊戲 1：斗六店名猜猜樂 (洗牌不重複 + 前/中/後隨機挖空 + 45秒計時 + 每日限 1 次) --- */
+            buildShuffledQuizDeck() {
+                const stores = this.app.repo.allStores;
+                const cleanList = stores
+                    .map((s) => ({
+                        store: s,
+                        clean: s.name.replace(/\(.*?\)|（.*?）/g, '').trim()
+                    }))
+                    .filter((x) => x.clean.length >= 3);
+
+                // 收集所有店名 2 字片段作為逼真的干擾選項池
+                const segmentPool = new Set([
+                    '牛肉麵', '火雞肉', '自助餐', '香豆腐', '早午餐', '關東煮', '蛋餅', '拉麵',
+                    '水餃', '咖啡', '食堂', '小館', '飯糰', '紅茶', '蒸餃', '碳烤', '老店',
+                    '阿婆', '阿琴', '斗六', '龍潭', '民生', '微笑', '幸福', '經典', '手工', '古早味'
+                ]);
+                cleanList.forEach(({ clean }) => {
+                    if (clean.length >= 4) {
+                        segmentPool.add(clean.slice(0, 2));
+                        segmentPool.add(clean.slice(-2));
+                    }
+                });
+                const poolArr = Array.from(segmentPool);
+
+                // Fisher-Yates 洗牌演算法，確保不重複出現
+                const shuffled = [...cleanList];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+
+                return shuffled.map(({ store, clean }) => {
+                    // 隨機決定挖空長度 (2 或 3 字) 與挖空位置 (前 / 中 / 後)
+                    const blankLen = clean.length >= 5 && Math.random() < 0.45 ? 3 : 2;
+                    const maxStart = Math.max(0, clean.length - blankLen);
+                    const startIdx = Math.floor(Math.random() * (maxStart + 1));
+                    const prefix = clean.slice(0, startIdx);
+                    const blank = clean.slice(startIdx, startIdx + blankLen);
+                    const suffix = clean.slice(startIdx + blankLen);
+
+                    // 挑選同長度優先的 3 個不重複干擾項
+                    const sameLen = poolArr.filter((w) => w !== blank && w.length === blank.length);
+                    const fallback = poolArr.filter((w) => w !== blank && w.length !== blank.length);
+                    const candidates = [...sameLen.sort(() => Math.random() - 0.5), ...fallback.sort(() => Math.random() - 0.5)];
+                    const distractors = [];
+                    for (const c of candidates) {
+                        if (!distractors.includes(c)) distractors.push(c);
+                        if (distractors.length === 3) break;
+                    }
+
+                    const options = [blank, ...distractors].sort(() => Math.random() - 0.5);
+                    return {
+                        prefix,
+                        blank,
+                        suffix,
+                        fullName: clean,
+                        answer: blank,
+                        options,
+                        hint: `提示：斗六周邊「${store.type}」店家，均消約 ${store.priceLevel} 元，Google 評分 ${store.rating} 分！`
+                    };
+                });
+            }
+
+            startQuiz() {
+                if (this.quiz.isRunning) return;
+                if (this.hasPlayedQuizToday()) {
+                    this.app.notifier.show('今天已經玩過斗六店名猜猜樂囉！明天再來挑戰～');
+                    this.syncDailyLimitUI();
+                    return;
+                }
+
+                this.quiz.deck = this.buildShuffledQuizDeck();
+                if (this.quiz.deck.length === 0) {
+                    this.app.notifier.show('店家清單還在載入中，請稍候一下！');
+                    return;
+                }
+
+                this.quiz.isRunning = true;
+                this.quiz.timeLeft = this.QUIZ_DURATION;
+                this.quiz.correctCount = 0;
+                this.quiz.streak = 0;
+                this.quiz.deckIdx = 0;
+                this.quiz.answered = false;
+
+                document.getElementById('quiz-overlay').classList.add('hidden');
+                document.getElementById('quiz-play-area').classList.remove('hidden');
+                document.getElementById('quiz-time-badge').textContent = `剩餘時間：${this.quiz.timeLeft}s`;
+                document.getElementById('quiz-score-badge').textContent = '答對：0 題';
+                document.getElementById('quiz-streak-badge').textContent = '連對：0 題';
+                this.syncDailyLimitUI();
+
+                this.nextQuiz();
+
+                clearInterval(this.quiz.timerId);
+                this.quiz.timerId = setInterval(() => {
+                    this.quiz.timeLeft--;
+                    document.getElementById('quiz-time-badge').textContent = `剩餘時間：${this.quiz.timeLeft}s`;
+                    if (this.quiz.timeLeft <= 0) {
+                        this.stopQuiz(true);
+                    }
+                }, 1000);
             }
 
             nextQuiz() {
-                this.quizAnswered = false;
+                if (!this.quiz.isRunning) return;
+                clearTimeout(this.quiz.autoNextId);
+
+                if (this.quiz.deckIdx >= this.quiz.deck.length) {
+                    this.stopQuiz(true);
+                    return;
+                }
+
+                this.quiz.answered = false;
                 const fbBox = document.getElementById('quiz-feedback-box');
                 fbBox.classList.add('hidden');
                 fbBox.classList.remove('flex');
                 document.getElementById('quiz-manual-input').value = '';
 
-                const pool = [...AppConfig.QUIZ_BANK];
-                const suffixes = ['火雞肉飯', '自助餐', '香豆腐', '牛雜', '水餃', '拉麵', '咖啡館', '小館', '蔥油餅', '早午餐', '蒸餃', '蛋餅'];
-                this.app.repo.allStores.forEach((s) => {
-                    const clean = s.name.replace(/\(.*?\)|（.*?）/g, '').trim();
-                    for (const sfx of suffixes) {
-                        if (clean.endsWith(sfx) && clean.length > sfx.length) {
-                            const pfx = clean.slice(0, clean.length - sfx.length).trim();
-                            if (pfx && !pool.some((p) => p.prefix === pfx)) {
-                                const distractors = suffixes.filter((x) => x !== sfx).sort(() => Math.random() - 0.5).slice(0, 3);
-                                pool.push({ prefix: pfx, blank: sfx, suffix: '', hint: `提示：雲科周邊的「${s.type}」店，均消約 ${s.priceLevel} 元，Google 評分 ${s.rating} 分！`, options: [sfx, ...distractors] });
-                            }
-                            break;
-                        }
-                    }
-                });
+                const q = this.quiz.deck[this.quiz.deckIdx++];
+                this.quiz.current = q;
 
-                const picked = pool[Math.floor(Math.random() * pool.length)];
-                const shuffled = [...picked.options].sort(() => Math.random() - 0.5);
-                this.currentQuiz = { ...picked, answer: picked.blank };
-
-                document.getElementById('quiz-hint-text').textContent = picked.hint;
+                document.getElementById('quiz-hint-text').textContent = q.hint;
                 document.getElementById('quiz-store-title').innerHTML = `
-                    <span>${FormatUtils.escapeHtml(picked.prefix)}</span>
-                    <span id="quiz-blank-slot" class="inline-flex items-center justify-center min-w-[115px] px-3 py-1 rounded-2xl bg-[#FFF9E6] border-2 border-dashed border-[#E87A64] text-[#E87A64] text-xl sm:text-2xl font-black">＿＿＿＿</span>
-                    ${picked.suffix ? `<span>${FormatUtils.escapeHtml(picked.suffix)}</span>` : ''}
+                    ${q.prefix ? `<span>${FormatUtils.escapeHtml(q.prefix)}</span>` : ''}
+                    <span id="quiz-blank-slot" class="inline-flex items-center justify-center min-w-[96px] px-3 py-1 rounded-2xl bg-[#FFF9E6] border-2 border-dashed border-[#E87A64] text-[#E87A64] text-xl sm:text-2xl font-black">＿＿＿</span>
+                    ${q.suffix ? `<span>${FormatUtils.escapeHtml(q.suffix)}</span>` : ''}
                 `;
 
-                document.getElementById('quiz-options-grid').innerHTML = shuffled.map((opt, idx) => `
+                document.getElementById('quiz-options-grid').innerHTML = q.options.map((opt, idx) => `
                     <button type="button" data-action="answer-quiz" data-answer="${FormatUtils.escapeHtml(opt)}"
                         class="quiz-opt-btn sumikko-card-sm bg-[#FAF6F0] hover:bg-[#FCE8A6] p-3.5 text-sm sm:text-base font-black text-[#5C4938] transition flex items-center justify-center gap-2 cursor-pointer">
                         <span class="w-6 h-6 rounded-full bg-white border-2 border-[#5C4938] flex items-center justify-center text-xs">${idx + 1}</span>
@@ -3411,41 +3589,70 @@
             }
 
             submitQuiz(selectedText, btnEl = null) {
-                if (this.quizAnswered || !this.currentQuiz) return;
-                this.quizAnswered = true;
+                if (!this.quiz.isRunning || this.quiz.answered || !this.quiz.current) return;
+                this.quiz.answered = true;
 
-                const isCorrect = selectedText.trim() === this.currentQuiz.answer.trim();
+                const q = this.quiz.current;
+                const isCorrect = selectedText.trim() === q.answer.trim();
                 const slot = document.getElementById('quiz-blank-slot');
-                slot.textContent = this.currentQuiz.answer;
-                slot.className = `inline-flex items-center justify-center min-w-[115px] px-3.5 py-1 rounded-2xl border-2 border-[#5C4938] text-[#5C4938] text-xl sm:text-2xl font-black animate-pop-card ${isCorrect ? 'bg-[#A8D8B9]' : 'bg-[#F9C5BD]'}`;
+                slot.textContent = q.answer;
+                slot.className = `inline-flex items-center justify-center min-w-[96px] px-3.5 py-1 rounded-2xl border-2 border-[#5C4938] text-[#5C4938] text-xl sm:text-2xl font-black animate-pop-card ${isCorrect ? 'bg-[#A8D8B9]' : 'bg-[#F9C5BD]'}`;
 
                 document.querySelectorAll('.quiz-opt-btn').forEach((b) => {
-                    if (b.dataset.answer === this.currentQuiz.answer) b.classList.add('bg-[#A8D8B9]');
+                    if (b.dataset.answer === q.answer) b.classList.add('bg-[#A8D8B9]');
                 });
 
-                const fullName = `${this.currentQuiz.prefix}${this.currentQuiz.answer}${this.currentQuiz.suffix || ''}`;
                 const fbBox = document.getElementById('quiz-feedback-box');
                 fbBox.classList.remove('hidden');
                 fbBox.classList.add('flex');
 
                 if (isCorrect) {
-                    this.quizStreak++;
-                    fbBox.className = 'sumikko-card-sm p-4 mt-4 flex items-center justify-between gap-3 bg-[#EAF6EE]';
+                    this.quiz.correctCount++;
+                    this.quiz.streak++;
+                    fbBox.className = 'sumikko-card-sm p-3.5 mt-3 flex items-center justify-between gap-3 bg-[#EAF6EE]';
                     document.getElementById('quiz-feedback-icon').textContent = 'O';
-                    document.getElementById('quiz-feedback-title').textContent = `填空成功！「${fullName}」`;
-                    document.getElementById('quiz-feedback-desc').textContent = '阿蝦幫你拍拍手！獲得 +25 枚酥脆蝦米幣！';
-                    this.app.awardCoins(25, `店名填空答對「${fullName}」！`);
+                    document.getElementById('quiz-feedback-title').textContent = `答對！「${q.fullName}」`;
+                    document.getElementById('quiz-feedback-desc').textContent = '即將自動進入下一題...';
                 } else {
-                    this.quizStreak = 0;
+                    this.quiz.streak = 0;
                     if (btnEl) btnEl.classList.add('bg-[#F9C5BD]');
-                    fbBox.className = 'sumikko-card-sm p-4 mt-4 flex items-center justify-between gap-3 bg-[#FFF5F5]';
+                    fbBox.className = 'sumikko-card-sm p-3.5 mt-3 flex items-center justify-between gap-3 bg-[#FFF5F5]';
                     document.getElementById('quiz-feedback-icon').textContent = '?';
-                    document.getElementById('quiz-feedback-title').textContent = `正確店名是「${fullName}」`;
-                    document.getElementById('quiz-feedback-desc').textContent = '下一題繼續加油！';
+                    document.getElementById('quiz-feedback-title').textContent = `正確店名是「${q.fullName}」`;
+                    document.getElementById('quiz-feedback-desc').textContent = '別氣餒，下一題繼續加油！';
                 }
-                document.getElementById('quiz-streak-badge').textContent = `連續答對：${this.quizStreak} 題`;
+
+                document.getElementById('quiz-score-badge').textContent = `答對：${this.quiz.correctCount} 題`;
+                document.getElementById('quiz-streak-badge').textContent = `連對：${this.quiz.streak} 題`;
+
+                this.quiz.autoNextId = setTimeout(() => {
+                    if (this.quiz.isRunning) this.nextQuiz();
+                }, 950);
             }
 
+            stopQuiz(giveReward) {
+                this.quiz.isRunning = false;
+                clearInterval(this.quiz.timerId);
+                clearTimeout(this.quiz.autoNextId);
+
+                document.getElementById('quiz-play-area').classList.add('hidden');
+                document.getElementById('quiz-overlay').classList.remove('hidden');
+
+                if (giveReward) {
+                    this.app.userState.economy.lastQuizPlayDate = FormatUtils.getTodayIsoDate();
+                    this.app.userState.saveEconomy();
+
+                    const earned = Math.min(120, Math.max(10, this.quiz.correctCount * 15));
+                    document.getElementById('quiz-overlay-title').textContent = `時間到！共答對 ${this.quiz.correctCount} 題`;
+                    document.getElementById('quiz-overlay-desc').textContent = `本次結算獲得 +${earned} 枚酥脆蝦米幣！明天再來挑戰斗六店名猜猜樂吧～`;
+                    document.getElementById('quiz-overlay-btn-text').textContent = '今日次數已用完';
+                    this.app.awardCoins(earned, `斗六店名猜猜樂結算（答對 ${this.quiz.correctCount} 題）！`);
+                    this.app.notifier.fireConfetti();
+                }
+                this.syncDailyLimitUI();
+            }
+
+            /* --- 遊戲 2：阿蝦接接樂 (完整手繪食物掉落圖 + 每日限玩 1 次) --- */
             bindCanvasInput() {
                 const canvas = document.getElementById('catcher-canvas');
                 if (!canvas) return;
@@ -3474,10 +3681,17 @@
 
             startCatcher() {
                 if (this.catcher.isRunning) return;
+                if (this.hasPlayedCatcherToday()) {
+                    this.app.notifier.show('今天已經玩過阿蝦接接樂囉！明天再來賺蝦米幣～');
+                    this.syncDailyLimitUI();
+                    return;
+                }
+
                 Object.assign(this.catcher, { isRunning: true, score: 0, timeLeft: 30, bowlX: 190, items: [], popups: [] });
                 document.getElementById('catcher-overlay').classList.add('hidden');
                 document.getElementById('catcher-score-badge').textContent = '目前分數：0';
                 document.getElementById('catcher-time-badge').textContent = '剩餘時間：30s';
+                this.syncDailyLimitUI();
 
                 clearInterval(this.catcher.timerId);
                 this.catcher.timerId = setInterval(() => {
@@ -3496,13 +3710,190 @@
                 document.getElementById('catcher-overlay').classList.remove('hidden');
 
                 if (giveReward) {
+                    this.app.userState.economy.lastCatcherPlayDate = FormatUtils.getTodayIsoDate();
+                    this.app.userState.saveEconomy();
+
                     const coins = Math.max(10, Math.min(80, Math.round(this.catcher.score / 2)));
                     document.getElementById('catcher-overlay-title').textContent = `時間到！總分 ${this.catcher.score} 分`;
-                    document.getElementById('catcher-overlay-desc').textContent = `本次獲得 +${coins} 枚酥脆蝦米幣獎勵！`;
-                    document.getElementById('catcher-overlay-btn-text').textContent = '再玩一場接接樂！';
+                    document.getElementById('catcher-overlay-desc').textContent = `本次獲得 +${coins} 枚酥脆蝦米幣！明天再來陪阿蝦米米接美食吧～`;
+                    document.getElementById('catcher-overlay-btn-text').textContent = '今日次數已用完';
                     this.app.awardCoins(coins, `阿蝦接接樂結算（${this.catcher.score}分）！`);
                     this.app.notifier.fireConfetti();
                 }
+                this.syncDailyLimitUI();
+            }
+
+            /**
+             * 在 Canvas 上繪製精緻手繪風掉落食物插畫（炸蝦、飯糰、拉麵、珍奶、布丁、發霉菇）
+             */
+            drawIllustratedFood(ctx, item) {
+                ctx.save();
+                ctx.translate(item.x, item.y);
+                ctx.rotate(Math.sin(item.y * 0.04 + item.wobblePhase) * 0.14);
+                ctx.strokeStyle = '#5C4938';
+                ctx.lineWidth = 2.2;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+
+                if (item.kind === 'shrimp') {
+                    // 1. 黃金炸蝦 (+20)
+                    ctx.fillStyle = '#E87A64';
+                    ctx.beginPath();
+                    ctx.moveTo(6, -12);
+                    ctx.quadraticCurveTo(14, -22, 18, -12);
+                    ctx.quadraticCurveTo(22, -16, 18, -6);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#F3D39A';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 2, 13, 15, 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#5C4938';
+                    ctx.beginPath();
+                    ctx.arc(-5, 1, 1.7, 0, Math.PI * 2);
+                    ctx.arc(4, 1, 1.7, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#F59B90';
+                    ctx.beginPath();
+                    ctx.arc(-8, 4, 2.2, 0, Math.PI * 2);
+                    ctx.arc(7, 4, 2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (item.kind === 'onigiri') {
+                    // 2. 海苔飯糰 (+15)
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -16);
+                    ctx.quadraticCurveTo(18, -10, 15, 11);
+                    ctx.quadraticCurveTo(0, 15, -15, 11);
+                    ctx.quadraticCurveTo(-18, -10, 0, -16);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#5C4938';
+                    ctx.fillRect(-7, 3, 14, 10);
+
+                    ctx.beginPath();
+                    ctx.arc(-5, -2, 1.6, 0, Math.PI * 2);
+                    ctx.arc(5, -2, 1.6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#F9C5BD';
+                    ctx.beginPath();
+                    ctx.arc(-8, 1, 2.2, 0, Math.PI * 2);
+                    ctx.arc(8, 1, 2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (item.kind === 'ramen') {
+                    // 3. 豚骨拉麵碗 (+20)
+                    ctx.fillStyle = '#FFFDF9';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -4, 16, 7, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#FCE8A6';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -4, 12, 4.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#F9C5BD';
+                    ctx.beginPath();
+                    ctx.arc(-5, -5, 4.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#E87A64';
+                    ctx.beginPath();
+                    ctx.arc(5, -5, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#E87A64';
+                    ctx.beginPath();
+                    ctx.arc(0, -4, 16, 0, Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (item.kind === 'boba') {
+                    // 4. 黑糖珍珠奶茶 (+15)
+                    ctx.fillStyle = '#BBE2F2';
+                    ctx.fillRect(2, -20, 4, 10);
+                    ctx.strokeRect(2, -20, 4, 10);
+
+                    ctx.fillStyle = '#F3D39A';
+                    ctx.beginPath();
+                    ctx.moveTo(-11, -10);
+                    ctx.lineTo(11, -10);
+                    ctx.lineTo(9, 14);
+                    ctx.lineTo(-9, 14);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#FFFDF9';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -10, 12, 3.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#5C4938';
+                    [[-4, 10], [0, 11], [4, 10], [-2, 6], [3, 6]].forEach(([px, py]) => {
+                        ctx.beginPath();
+                        ctx.arc(px, py, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                } else if (item.kind === 'pudding') {
+                    // 5. 焦糖布丁 (+25)
+                    ctx.fillStyle = '#FCE8A6';
+                    ctx.beginPath();
+                    ctx.moveTo(-10, -8);
+                    ctx.lineTo(10, -8);
+                    ctx.lineTo(14, 11);
+                    ctx.lineTo(-14, 11);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#8C583A';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -8, 10, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#E87A64';
+                    ctx.beginPath();
+                    ctx.arc(0, -13, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                } else {
+                    // 6. 發霉毒香菇 (-15)
+                    ctx.fillStyle = '#EFECE6';
+                    ctx.beginPath();
+                    ctx.rect(-6, 0, 12, 13);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#B39DDB';
+                    ctx.beginPath();
+                    ctx.arc(0, 2, 16, Math.PI, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#A8D8B9';
+                    ctx.beginPath();
+                    ctx.arc(-7, -5, 3, 0, Math.PI * 2);
+                    ctx.arc(6, -6, 2.5, 0, Math.PI * 2);
+                    ctx.arc(0, -10, 2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
             }
 
             catcherLoop() {
@@ -3513,57 +3904,90 @@
 
                 ctx.fillStyle = '#EAF6EE';
                 ctx.fillRect(0, canvas.height - 28, canvas.width, 28);
+                ctx.strokeStyle = '#DFD5C6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height - 28);
+                ctx.lineTo(canvas.width, canvas.height - 28);
+                ctx.stroke();
 
                 if (Math.random() < 0.055) {
                     const goods = [
-                        { kind: 'shrimp', pts: 20, color: '#F3D39A' },
-                        { kind: 'onigiri', pts: 15, color: '#FFFFFF' },
-                        { kind: 'ramen', pts: 20, color: '#E87A64' },
-                        { kind: 'pudding', pts: 25, color: '#FCE8A6' }
+                        { kind: 'shrimp', pts: 20 },
+                        { kind: 'onigiri', pts: 15 },
+                        { kind: 'ramen', pts: 20 },
+                        { kind: 'boba', pts: 15 },
+                        { kind: 'pudding', pts: 25 }
                     ];
-                    const item = Math.random() < 0.22
-                        ? { kind: 'bad', pts: -15, color: '#B39DDB' }
+                    const pick = Math.random() < 0.22
+                        ? { kind: 'bad', pts: -15 }
                         : goods[Math.floor(Math.random() * goods.length)];
-                    this.catcher.items.push({ x: 32 + Math.random() * (canvas.width - 64), y: -20, vy: 2.3 + Math.random() * 1.7, ...item });
+                    this.catcher.items.push({
+                        x: 32 + Math.random() * (canvas.width - 64),
+                        y: -22,
+                        vy: 2.3 + Math.random() * 1.8,
+                        wobblePhase: Math.random() * Math.PI * 2,
+                        ...pick
+                    });
                 }
 
-                // 繪製湯碗
+                // 繪製底部：阿蝦與米米一起捧著大湯碗
                 const bx = this.catcher.bowlX;
                 const by = canvas.height - 32;
                 ctx.save();
                 ctx.strokeStyle = '#5C4938';
                 ctx.lineWidth = 2.2;
+
+                ctx.fillStyle = '#F3D39A';
+                ctx.beginPath();
+                ctx.arc(bx - 16, by - 14, 13, Math.PI, 0);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(bx + 14, by - 14, 14, Math.PI, 0);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#5C4938';
+                ctx.beginPath();
+                ctx.arc(bx - 20, by - 18, 1.6, 0, Math.PI * 2);
+                ctx.arc(bx - 12, by - 18, 1.6, 0, Math.PI * 2);
+                ctx.arc(bx + 10, by - 18, 1.6, 0, Math.PI * 2);
+                ctx.arc(bx + 18, by - 18, 1.6, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.fillStyle = '#F7A072';
                 ctx.beginPath();
                 ctx.arc(bx, by - 12, 36, 0, Math.PI);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
+
+                ctx.strokeStyle = '#FCE8A6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(bx - 28, by - 6);
+                ctx.lineTo(bx + 28, by - 6);
+                ctx.stroke();
                 ctx.restore();
 
-                // 更新掉落物
+                // 更新與繪製手繪食物掉落物
                 for (let i = this.catcher.items.length - 1; i >= 0; i--) {
                     const it = this.catcher.items[i];
                     it.y += it.vy;
-                    ctx.save();
-                    ctx.fillStyle = it.color;
-                    ctx.strokeStyle = '#5C4938';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(it.x, it.y, 14, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.fillStyle = '#5C4938';
-                    ctx.beginPath();
-                    ctx.arc(it.x - 4, it.y - 2, 1.8, 0, Math.PI * 2);
-                    ctx.arc(it.x + 4, it.y - 2, 1.8, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
+                    this.drawIllustratedFood(ctx, it);
 
                     if (it.y >= by - 26 && it.y <= by + 8 && Math.abs(it.x - bx) < 42) {
                         this.catcher.score = Math.max(0, this.catcher.score + it.pts);
                         document.getElementById('catcher-score-badge').textContent = `目前分數：${this.catcher.score}`;
-                        this.catcher.popups.push({ x: it.x, y: by - 28, text: it.pts > 0 ? `+${it.pts}` : `${it.pts}`, color: it.pts > 0 ? '#E87A64' : '#7E57C2', alpha: 1 });
+                        this.catcher.popups.push({
+                            x: it.x, y: by - 28,
+                            text: it.pts > 0 ? `+${it.pts}` : `${it.pts}`,
+                            color: it.pts > 0 ? '#E87A64' : '#7E57C2',
+                            alpha: 1
+                        });
                         this.catcher.items.splice(i, 1);
                     } else if (it.y > canvas.height + 28) {
                         this.catcher.items.splice(i, 1);
@@ -3579,7 +4003,10 @@
                     ctx.globalAlpha = p.alpha;
                     ctx.font = '900 15px "Zen Maru Gothic", sans-serif';
                     ctx.fillStyle = p.color;
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
                     ctx.textAlign = 'center';
+                    ctx.strokeText(p.text, p.x, p.y);
                     ctx.fillText(p.text, p.x, p.y);
                     ctx.restore();
                 }
@@ -4187,10 +4614,13 @@
                     document.getElementById(`m-tab-btn-${t}`)?.classList.toggle('active', t === tabName);
                 });
 
-                if (tabName !== 'arcade' && this.arcadeCtrl.catcher.isRunning) this.arcadeCtrl.stopCatcher(false);
+                if (tabName !== 'arcade') {
+                    if (this.arcadeCtrl.catcher.isRunning) this.arcadeCtrl.stopCatcher(false);
+                    if (this.arcadeCtrl.quiz.isRunning) this.arcadeCtrl.stopQuiz(false);
+                }
                 if (tabName !== 'map') this.mapCtrl.stopCruise();
 
-                if (tabName === 'arcade' && !this.arcadeCtrl.currentQuiz) this.arcadeCtrl.nextQuiz();
+                if (tabName === 'arcade') this.arcadeCtrl.syncDailyLimitUI();
                 if (tabName === 'pocket') this.collectionCtrl.renderPocket();
                 if (tabName === 'pokedex') { this.collectionCtrl.renderPokedex(); this.collectionCtrl.renderMascots(); this.collectionCtrl.renderTownShop(); }
                 if (tabName === 'map') setTimeout(() => this.mapCtrl.renderFullMap(), 80);
@@ -4525,6 +4955,7 @@
 
                     // 遊樂場
                     case 'switch-arcade': this.arcadeCtrl.switchGame(el.dataset.mode); break;
+                    case 'start-quiz': this.arcadeCtrl.startQuiz(); break;
                     case 'next-quiz': this.arcadeCtrl.nextQuiz(); break;
                     case 'submit-manual-quiz': this.arcadeCtrl.submitQuiz(document.getElementById('quiz-manual-input').value); break;
                     case 'answer-quiz': this.arcadeCtrl.submitQuiz(el.dataset.answer, el); break;
